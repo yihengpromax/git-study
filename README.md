@@ -36,5 +36,21 @@ git push -u origin main
 xxxxx
 ```
 
-N Commit
+#Four Commit
+```sh
+# 克隆
+git init
+git clone
 
+# 拉取代码
+git pull origin main
+
+# 切换分支
+git checkout <分支名>
+git checkout . # 把当前工作目录下所有已追踪（tracked）文件的本地更改全部还原为最近一次 commit 的状态。
+
+#设置用户名和密码
+git config --global user.name "Your Name"
+git config --global user.email "youremail@example.com"
+git config --global --list # 查看设置的用户名和密码
+```
