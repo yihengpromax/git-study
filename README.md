@@ -54,3 +54,13 @@ git config --global user.name "Your Name"
 git config --global user.email "youremail@example.com"
 git config --global --list # 查看设置的用户名和密码
 ```
+
+#Five Commit
+```sh
+# 暂存
+git add <file>
+# 例如 git add .
+
+# 重置掉对应文件的修改
+git restore <file>
+```
