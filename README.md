@@ -10,7 +10,7 @@ https://www.cnblogs.com/jamiechoo/articles/18408791
 
 
 
-# First Commit
+# First submission
 
 ```sh
 # 第一次提交步骤
@@ -22,7 +22,7 @@ git push -u <remote> <branch> # 这一步需要验证身份，才能推送成功
 
 
 
-# Second Commit
+# Second submission
 
 ```sh
 # 第二次提交
@@ -40,7 +40,7 @@ git merg #合并指定分支到当前分支。
 
 
 
-# Third Commit
+# Third submission
 
 ```sh
 # 例子
@@ -62,7 +62,7 @@ xxxxx
 
 
 
-# Four Commit
+# Fourth submission
 
 ```sh
 # 克隆
@@ -84,7 +84,7 @@ git config --global --list # 查看设置的用户名和密码
 
 
 
-# Five Commit
+# Fifth submission
 
 ```sh
 # 暂存
@@ -94,3 +94,18 @@ git add <file>
 # 重置掉对应文件的修改
 git restore <file>
 ```
+
+
+
+# Sixth submission
+
+##### Git的工作原理
+
+根据 git 的几个文件存储区域，git 的工作区域可以划分为 4 个：
+
+- 工作区：你在本地编辑器里改动的代码，所见即所得，里面的内容都是最新的
+- 暂存区：通过 `git add` 指令，会将你工作区改动的代码提交到暂存区里
+- 本地仓库：通过 `git commit` 指令，会将暂存区变动的代码提交到本地仓库中，本地仓库位于你的电脑上
+- 远程仓库：远端用来托管代码的仓库，通过 `git push` 指令，会将本地仓库的代码推送到远程仓库中
+
+![](.\Image\底层逻辑.png)
