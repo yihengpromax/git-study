@@ -86,6 +86,9 @@ git checkout . # 把当前工作目录下所有已追踪（tracked）文件的�
 git config --global user.name "Your Name"
 git config --global user.email "youremail@example.com"
 git config --global --list # 查看设置的用户名和密码
+
+git config --global --unset http.proxy
+git config --global --unset https.proxy
 ```
 
 
