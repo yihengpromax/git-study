@@ -1,11 +1,12 @@
-git-study
-
-First Commit
+# git-study
 
 
+# git的高阶用法请访问下面的链接
+https://www.cnblogs.com/jamiechoo/articles/18408791
 
-Second Commit
 
+# 以下是学习日志
+# First Commit
 ```sh
 # 第一次提交步骤
 git add <yourfiles path> or git add .
@@ -15,8 +16,23 @@ git push -u <remote> <branch> # 这一步需要验证身份，才能推送成功
 ```
 
 
+# Second Commit
+```sh
+# 第二次提交
+git config #配置用户信息。
+git init #初始化一个新的 Git 仓库。
+git clone #克隆远程仓库到本地。
+git add <文件名> #将文件添加到暂存区。
+git commit -m "提交信息" #提交暂存区的文件到版本库。
+git status #查看工作区和暂存区的状态。
+git push #将本地更改推送到远程仓库。
+git pull #从远程仓库拉取最新的更改并合并。
+git branch #列出、创建或删除分支。
+git merg #合并指定分支到当前分支。
+```
 
-Third Commit
+
+# Third Commit
 
 ```sh
 # 例子
@@ -36,7 +52,7 @@ git push -u origin main
 xxxxx
 ```
 
-#Four Commit
+# Four Commit
 ```sh
 # 克隆
 git init
@@ -55,7 +71,7 @@ git config --global user.email "youremail@example.com"
 git config --global --list # 查看设置的用户名和密码
 ```
 
-#Five Commit
+# Five Commit
 ```sh
 # 暂存
 git add <file>
