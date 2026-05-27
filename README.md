@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #git-study
 #git的高阶用法请访问下面的链接
 https://www.cnblogs.com/jamiechoo/articles/18408791
@@ -5,6 +6,22 @@ https://www.cnblogs.com/jamiechoo/articles/18408791
 
 # 以下是学习日志
 # First Commit
+=======
+# git-study
+
+
+# git的高阶用法请访问下面的链接
+https://www.cnblogs.com/jamiechoo/articles/18408791
+
+
+
+# 以下是学习日志
+
+
+
+# First submission
+
+>>>>>>> 54aaa89df91f6edf0a3e56fd602e0f3b38786d26
 ```sh
 # 第一次提交步骤
 git add <yourfiles path> or git add .
@@ -29,8 +46,30 @@ git branch #列出、创建或删除分支。
 git merg #合并指定分支到当前分支。
 ```
 
+<<<<<<< HEAD
 
 # Third Commit
+=======
+# Second submission
+
+```sh
+# 第二次提交
+git config #配置用户信息。
+git init #初始化一个新的 Git 仓库。
+git clone #克隆远程仓库到本地。
+git add <文件名> #将文件添加到暂存区。
+git commit -m "提交信息" #提交暂存区的文件到版本库。
+git status #查看工作区和暂存区的状态。
+git push #将本地更改推送到远程仓库。
+git pull #从远程仓库拉取最新的更改并合并。
+git branch #列出、创建或删除分支。
+git merg #合并指定分支到当前分支。
+```
+
+
+
+# Third submission
+>>>>>>> 54aaa89df91f6edf0a3e56fd602e0f3b38786d26
 
 ```sh
 # 例子
@@ -50,7 +89,14 @@ git push -u origin main
 xxxxx
 ```
 
+<<<<<<< HEAD
 # Four Commit
+=======
+
+
+# Fourth submission
+
+>>>>>>> 54aaa89df91f6edf0a3e56fd602e0f3b38786d26
 ```sh
 # 克隆
 git init
@@ -68,3 +114,31 @@ git config --global user.name "Your Name"
 git config --global user.email "youremail@example.com"
 git config --global --list # 查看设置的用户名和密码
 ```
+
+
+
+# Fifth submission
+
+```sh
+# 暂存
+git add <file>
+# 例如 git add . 暂存当前目录下所有修改的文件
+
+# 重置掉对应文件的修改
+git restore <file>
+```
+
+
+
+# Sixth submission
+
+##### Git的工作原理
+
+根据 git 的几个文件存储区域，git 的工作区域可以划分为 4 个：
+
+- 工作区：你在本地编辑器里改动的代码，所见即所得，里面的内容都是最新的
+- 暂存区：通过 `git add` 指令，会将你工作区改动的代码提交到暂存区里
+- 本地仓库：通过 `git commit` 指令，会将暂存区变动的代码提交到本地仓库中，本地仓库位于你的电脑上
+- 远程仓库：远端用来托管代码的仓库，通过 `git push` 指令，会将本地仓库的代码推送到远程仓库中
+
+![](.\Image\底层逻辑.png)
