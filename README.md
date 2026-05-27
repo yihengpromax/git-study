@@ -1,6 +1,10 @@
-git-study
+#git-study
+#git的高阶用法请访问下面的链接
+https://www.cnblogs.com/jamiechoo/articles/18408791
 
-#First Commit
+
+# 以下是学习日志
+# First Commit
 ```sh
 # 第一次提交步骤
 git add <yourfiles path> or git add .
@@ -10,7 +14,7 @@ git push -u <remote> <branch> # 这一步需要验证身份，才能推送成功
 ```
 
 
-#Second Commit
+# Second Commit
 ```sh
 # 第二次提交
 git config #配置用户信息。
@@ -26,7 +30,7 @@ git merg #合并指定分支到当前分支。
 ```
 
 
-#Third Commit
+# Third Commit
 
 ```sh
 # 例子
@@ -46,7 +50,7 @@ git push -u origin main
 xxxxx
 ```
 
-#Four Commit
+# Four Commit
 ```sh
 # 克隆
 git init
