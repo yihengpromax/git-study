@@ -2,12 +2,13 @@
 bin/
 
 # build
-build/
+MyMessage/build/
 
 # Logs
 logs
 *.log
 
 # user
+MyMessage/.qtcreator/
 *.pro.user
 *.pro.user.4.8-pre1

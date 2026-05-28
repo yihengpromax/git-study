@@ -24,16 +24,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        src/ui/logindlg.cpp \
         src/core/networkmanager.cpp \
         src/main.cpp \
+        src/ui/loginframe.cpp \
         src/ui/mainwindow.cpp
 
 HEADERS += \
-        src/ui/logindlg.h \
         src/core/networkmanager.h \
+        src/ui/loginframe.h \
         src/ui/mainwindow.h
 
 FORMS += \
-        src/ui/logindlg.ui \
+        src/ui/loginframe.ui \
         src/ui/mainwindow.ui

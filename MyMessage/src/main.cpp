@@ -1,11 +1,20 @@
-#include "ui/logindlg.h"
+#include "ui/loginframe.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    LoginDlg dlg;
-    dlg.show();
+    LoginFrame* frame = LoginFrame::ShowLoginFrame(nullptr);
+    int exitcode = 0;
+    if (frame)
+    {
+        frame->show();
+        exitcode = a.exec(); // 进入Qt事件循环
 
-    return a.exec();
+        delete frame;
+        frame = nullptr;
+    }
+
+
+    return exitcode;
 }
