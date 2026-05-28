@@ -32,6 +32,7 @@ SOURCES += \
 
 HEADERS += \
         src/core/networkmanager.h \
+        src/stdafx.h \
         src/ui/loginframe.h \
         src/ui/mainwindow.h \
         src/utils/util.h
