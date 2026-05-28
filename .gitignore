@@ -1,8 +1,13 @@
 # bin
 bin/
 
+# build
+build/
 
 # Logs
 logs
 *.log
 
+# user
+*.pro.user
+*.pro.user.4.8-pre1
