@@ -27,12 +27,14 @@ SOURCES += \
         src/core/networkmanager.cpp \
         src/main.cpp \
         src/ui/loginframe.cpp \
-        src/ui/mainwindow.cpp
+        src/ui/mainwindow.cpp \
+        src/utils/util.cpp
 
 HEADERS += \
         src/core/networkmanager.h \
         src/ui/loginframe.h \
-        src/ui/mainwindow.h
+        src/ui/mainwindow.h \
+        src/utils/util.h
 
 FORMS += \
         src/ui/loginframe.ui \

@@ -33,7 +33,7 @@ LoginFrame* LoginFrame::ShowLoginFrame(QWidget *parent)
 
 void LoginFrame::InitWindow()
 {
-    setWindowTitle("登录到");
+    setWindowTitle(tr("Login In"));
     InitSignalWithSlot();
 }
 
