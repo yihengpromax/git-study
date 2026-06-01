@@ -1,9 +1,16 @@
 #include "ui/loginframe.h"
+#include "utils/util.h"
+
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    // Test
+    QStringList sLst = Util::SplitStr("abcdefgghjkl", "a");
+    qDebug() << sLst;
+
     LoginFrame* frame = LoginFrame::ShowLoginFrame(nullptr);
     int exitcode = 0;
     if (frame)
