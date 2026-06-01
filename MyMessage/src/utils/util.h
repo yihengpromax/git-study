@@ -48,11 +48,17 @@ namespace Util
     QString ReplaceStr(const QString &s, const QString& oldStr, const QString & newStr, bool bReplaceOne = false, Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
 
+    //////////// 加解密
+    QString encrypt(const QString &plain, const QString &key);
+    QString decrypt(const QString &cipherBase64, const QString &key);
+
+
     //////////// 文件处理
 
 
 
     /////////// 日期处理
+
 
 
 }

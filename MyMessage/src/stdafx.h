@@ -1,4 +1,6 @@
 #pragma once
+#define APP_VERSION "1.26.0601"
+#define MASTER_KEY "THIS_IS_A_TEST_KEY"
 
 // 编码
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)

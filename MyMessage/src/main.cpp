@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     // Test
-    QStringList sLst = Util::SplitStr("abcdefgghjkl", "a");
+    QStringList sLst = Util::SplitStr("abcgdefgghjgkl", "g");
     qDebug() << sLst;
 
     LoginFrame* frame = LoginFrame::ShowLoginFrame(nullptr);
