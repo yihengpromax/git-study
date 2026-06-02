@@ -5,7 +5,7 @@ QWidget {
 
 /* ========== 输入框通用样式 ========== */
 QLineEdit {
-    background-color: #f5f7fb;
+    background-color: #ffffff;
     border-radius: 16px;
     font-family: inherit;
     color: #1e2a3e;
@@ -17,13 +17,13 @@ QLineEdit:focus {
     background-color: #ffffff;
 }
 
-QLineEdit::placeholder {
+QComboBox::placeholder {
     color: #9aa9bb;
 }
 
 /* ========== Combobox通用样式 ========== */
 QComboBox {
-    background-color: #f5f7fb;
+    background-color: #ffffff;
     border-radius: 16px;
     font-family: inherit;
     color: #1e2a3e;
