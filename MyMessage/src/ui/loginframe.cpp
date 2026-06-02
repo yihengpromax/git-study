@@ -142,12 +142,22 @@ void LoginFrame::OnBtnLoginClicked()
 {
     if (!ui->lineedit_name->text().isEmpty() && !ui->lineedit_password->text().isEmpty())
     {
-        // 读取数据库数据，校验账号密码
-        // TODO
-
         m_sCurUserID = ui->lineedit_name->text();
         m_sCurPassword = ui->lineedit_password->text();
-        QMessageBox::information(this, tr("Tips"), tr("Login Success!"));
+        if (1) // TODO 验证密码
+        {
+            QString qsGroupName = "User_" + m_sCurUserID;
+            QString qsAppConfigPath = QApplication::applicationDirPath() + "/config.ini";
+            QSettings localSet(qsAppConfigPath, QSettings::IniFormat);
+            localSet.beginGroup(qsGroupName);
+            localSet.setValue("UserID", m_sCurUserID);
+            localSet.setValue("Password", Util::encrypt(m_sCurPassword, MASTER_KEY));
+            localSet.setValue("RememberPassword", m_bRememberPassword);
+            localSet.setValue("AutoLogin", m_bAutoLogin);
+            localSet.endGroup();
+
+            QMessageBox::information(this, tr("Tips"), tr("Login Success!"));
+        }
     }
     else
     {

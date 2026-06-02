@@ -4,7 +4,7 @@
 
 namespace Util
 {
-    ///////////// 字符串处理
+    // 字符串处理
     /***************************************************************
     @author: yiheng
     @date: 2026/6/1
@@ -48,16 +48,40 @@ namespace Util
     QString ReplaceStr(const QString &s, const QString& oldStr, const QString & newStr, bool bReplaceOne = false, Qt::CaseSensitivity cs = Qt::CaseSensitive);
 
 
-    //////////// 加解密
+
+    // 加解密
+    /***************************************************************
+    @author: yiheng
+    @date: 2026/6/2
+    @description: 使用Base64进行简易加密
+    @see:
+    @param: plain，待加密的明文
+    @param: key，Base64密钥
+    @return: 返回加密后的密文
+    @fix:
+    @update:
+    ***************************************************************/
     QString encrypt(const QString &plain, const QString &key);
+
+    /***************************************************************
+    @author: yiheng
+    @date: 2026/6/2
+    @description: 解密通过Base64加密的密文
+    @see:
+    @param: cipherBase64，待解密的Base64密文
+    @param: key，Base64密钥
+    @return: 返回解密后的明文
+    @fix:
+    @update:
+    ***************************************************************/
     QString decrypt(const QString &cipherBase64, const QString &key);
 
 
-    //////////// 文件处理
+    // 文件处理
 
 
 
-    /////////// 日期处理
+    // 日期处理
 
 
 
