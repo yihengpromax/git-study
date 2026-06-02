@@ -1,6 +1,6 @@
 #include "../stdafx.h"
-#include "loginframe.h"
-#include "mainwindow.h"
+#include "./loginframe.h"
+#include "./mainwindow.h"
 #include "ui_loginframe.h"
 #include "../utils/util.h"
 
