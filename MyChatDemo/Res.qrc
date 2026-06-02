@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/GlobalStyle.qss</file>
+        <file>resources/icon/MyChat.ico</file>
+        <file>resources/icon/checked.png</file>
+    </qresource>
+</RCC>

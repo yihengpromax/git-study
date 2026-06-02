@@ -1,0 +1,102 @@
+/* ========== 全局背景 ========== */
+QWidget {
+    background: #F0F4F9;
+}
+
+/* ========== 输入框通用样式 ========== */
+QLineEdit {
+    background-color: #f5f7fb;
+    border-radius: 16px;
+    font-family: inherit;
+    color: #1e2a3e;
+    selection-background-color: #0A75F0;
+}
+
+QLineEdit:focus {
+    border-color: #0A75F0;
+    background-color: #ffffff;
+}
+
+QLineEdit::placeholder {
+    color: #9aa9bb;
+}
+
+/* ========== Combobox通用样式 ========== */
+QComboBox {
+    background-color: #f5f7fb;
+    border-radius: 16px;
+    font-family: inherit;
+    color: #1e2a3e;
+    selection-background-color: #0A75F0;
+}
+
+QComboBox:focus {
+    border-color: #0A75F0;
+    background-color: #ffffff;
+}
+
+QComboBox::placeholder {
+    color: #9aa9bb;
+}
+
+/* ========== 复选框 ========== */
+QCheckBox {
+    spacing: 6px;
+    color: #5f6c80;
+    font-size: 12px;
+    font-family: inherit;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+}
+
+QCheckBox::indicator:checked {
+    image: url(:/resources/icon/checked.png);
+}
+
+/* ========== 链接按钮（用于注册账号/找回密码） ========== */
+QPushButton#LinkButton {
+    background: transparent;
+    border: none;
+    color: #0A75F0;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+QPushButton#LinkButton:hover {
+    color: #52A9FF;
+}
+
+/* ========== 登录主按钮 ========== */
+QPushButton#LoginButton {
+    background-color: #0A75F0;
+    border-radius: 40px;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 0;
+    font-family: inherit;
+}
+
+QPushButton#LoginButton:hover {
+    background-color: #0D6BE0;
+}
+
+QPushButton#LoginButton:pressed {
+    background-color: #095acb;
+}
+
+
+
+/* ========== 分割线（可选装饰） ========== */
+QLine {
+    background-color: #eef2f6;
+    max-height: 1px;
+}
