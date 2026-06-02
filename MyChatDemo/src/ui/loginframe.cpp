@@ -1,5 +1,6 @@
 #include "../stdafx.h"
 #include "loginframe.h"
+#include "mainwindow.h"
 #include "ui_loginframe.h"
 #include "../utils/util.h"
 
@@ -171,7 +172,12 @@ void LoginFrame::OnBtnLoginClicked()
             localSet.setValue("AutoLogin", m_bAutoLogin);
             localSet.endGroup();
 
-            QMessageBox::information(this, tr("Tips"), tr("Login Success!"));
+            // QMessageBox::information(this, tr("Tips"), tr("Login Success!"));
+            MainWindow::ShowMainWindow(this);
+        }
+        else
+        {
+
         }
     }
     else
