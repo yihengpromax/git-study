@@ -7,6 +7,7 @@ namespace Ui {
 class LoginFrame;
 }
 
+class NetworkManager;
 class LoginFrame : public QMainWindow
 {
     Q_OBJECT
@@ -31,6 +32,9 @@ private slots:
     void OnCkbAutoLoginStateChanged(Qt::CheckState state);
     void OnCkbRememberStateChanged(Qt::CheckState state);
     void OnComboboxCurTextChanged(const QString& sText);
+    void OnLoginResult(bool ok, int userId);
+    void OnConnectedServer();
+    void OnDisconnectedServer();
 
 private:
     Ui::LoginFrame *ui;
@@ -38,6 +42,7 @@ private:
     QString m_sCurUserID, m_sCurPassword; // 明文
     QString m_sVersion;
     QStringList m_lstFirstGroupNames;
+    NetworkManager* m_pNetworkMgr;
 };
 
 #endif // LOGINFRAME_H

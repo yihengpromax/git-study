@@ -32,6 +32,7 @@ SOURCES += \
 
 HEADERS += \
         src/core/networkmanager.h \
+        src/protocol.h \
         src/stdafx.h \
         src/utils/resourceloader.h \
         src/utils/util.h

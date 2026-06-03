@@ -6,16 +6,28 @@ QWidget {
 /* ========== 输入框通用样式 ========== */
 QLineEdit {
     background-color: #ffffff;
-    border-radius: 16px;
+	border-color: #000000;
     font-family: inherit;
     color: #1e2a3e;
     selection-background-color: #0A75F0;
 }
 
-QLineEdit:focus {
-    border-color: #0A75F0;
+QDateEdit {
     background-color: #ffffff;
+	border-color: #000000;
+    font-family: inherit;
+    color: #1e2a3e;
+    selection-background-color: #0A75F0;
 }
+
+QTextEdit {
+    background-color: #ffffff;
+	border-color: #000000;
+    font-family: inherit;
+    color: #1e2a3e;
+    selection-background-color: #0A75F0;
+}
+
 
 QComboBox::placeholder {
     color: #9aa9bb;
@@ -24,7 +36,7 @@ QComboBox::placeholder {
 /* ========== Combobox通用样式 ========== */
 QComboBox {
     background-color: #ffffff;
-    border-radius: 16px;
+	border-color: #000000;
     font-family: inherit;
     color: #1e2a3e;
     selection-background-color: #0A75F0;

@@ -1,21 +1,33 @@
 #include "../stdafx.h"
+#include "../protocol.h"
 #include "./loginframe.h"
 #include "./mainwindow.h"
 #include "ui_loginframe.h"
 #include "../utils/util.h"
+#include "../core/networkmanager.h"
+#include "loadingbubbledialog.h"
+#include "userregisterdlg.h"
 
 #include <QScreen>
 #include <QMessageBox>
 #include <QSettings>
 #include <QMap>
+#include <QTimer>
 
 LoginFrame::LoginFrame(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::LoginFrame)
     , m_bRememberPassword(false)
     , m_bAutoLogin(false)
+    , m_pNetworkMgr(nullptr)
 {
     ui->setupUi(this);
+
+    // m_pNetworkMgr
+    m_pNetworkMgr = NetworkManager::GetInstance(this);
+    connect(m_pNetworkMgr, &NetworkManager::Connected, this, &LoginFrame::OnConnectedServer);
+    connect(m_pNetworkMgr, &NetworkManager::Disconnected, this, &LoginFrame::OnDisconnectedServer);
+    connect(m_pNetworkMgr, &NetworkManager::LoginResult, this, &LoginFrame::OnLoginResult);
 }
 
 LoginFrame::~LoginFrame()
@@ -159,25 +171,20 @@ void LoginFrame::OnBtnLoginClicked()
         m_sCurPassword = ui->lineedit_password->text();
         m_bRememberPassword = ui->cb_remember_password->isChecked();
         m_bAutoLogin = ui->cb_auto_login->isChecked();
-        if (1) // TODO 验证密码
-        {
-            QString qsGroupName = "User_" + m_sCurUserID;
-            QString qsAppConfigPath = QApplication::applicationDirPath() + "/config.ini";
-            QSettings localSet(qsAppConfigPath, QSettings::IniFormat);
-            localSet.beginGroup(qsGroupName);
-            localSet.setValue("UserID", m_sCurUserID);
-            m_bRememberPassword ? localSet.setValue("Password", Util::encrypt(m_sCurPassword, MASTER_KEY)) :
-                localSet.setValue("Password", "");
-            localSet.setValue("RememberPassword", m_bRememberPassword);
-            localSet.setValue("AutoLogin", m_bAutoLogin);
-            localSet.endGroup();
 
-            // QMessageBox::information(this, tr("Tips"), tr("Login Success!"));
-            MainWindow::ShowMainWindow(this);
+        if (m_pNetworkMgr)
+        {
+            m_pNetworkMgr->ConnectToServer("127.0.0.1", LINSTEN_PORT);
+            LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
+            if (!instance.IsStarted())
+            {
+                instance.setText("正在登录...");
+                instance.startLoading();
+            }
         }
         else
         {
-
+            QMessageBox::information(this, tr("Tips"), tr("Can't Connect Server..."));
         }
     }
     else
@@ -188,7 +195,7 @@ void LoginFrame::OnBtnLoginClicked()
 
 void LoginFrame::OnBtnRegisterClicked()
 {
-    QMessageBox::information(this, tr("Tips"), tr("To be developed."));
+    UserRegisterDlg::ShowUserRegisterDlg(this);
 }
 
 void LoginFrame::OnBtnModifyPassword()
@@ -235,6 +242,44 @@ void LoginFrame::OnComboboxCurTextChanged(const QString &sText)
     ui->cb_remember_password->setChecked(localSet.value("RememberPassword").toBool());
     ui->cb_auto_login->setChecked(localSet.value("AutoLogin").toBool());
     localSet.endGroup();
+}
+
+void LoginFrame::OnLoginResult(bool ok, int userId)
+{
+    LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
+    if (instance.IsStarted()) instance.stopLoading();
+    if (ok)
+    {
+        QString qsGroupName = "User_" + m_sCurUserID;
+        QString qsAppConfigPath = QApplication::applicationDirPath() + "/config.ini";
+        QSettings localSet(qsAppConfigPath, QSettings::IniFormat);
+        localSet.beginGroup(qsGroupName);
+        localSet.setValue("UserID", m_sCurUserID);
+        localSet.setValue("UserName", m_sCurUserID);
+        m_bRememberPassword ? localSet.setValue("Password", Util::encrypt(m_sCurPassword, MASTER_KEY)) :
+            localSet.setValue("Password", "");
+        localSet.setValue("RememberPassword", m_bRememberPassword);
+        localSet.setValue("AutoLogin", m_bAutoLogin);
+        localSet.endGroup();
+
+        MainWindow::ShowMainWindow(this);
+        this->deleteLater();
+    }
+    else
+    {
+        QMessageBox::information(this, tr("Tips"), tr("The account or password is incorrect."));
+    }
+}
+
+void LoginFrame::OnConnectedServer()
+{
+    m_pNetworkMgr->SendLogin(m_sCurUserID, m_sCurPassword);
+    qDebug() << "Connected...";
+}
+
+void LoginFrame::OnDisconnectedServer()
+{
+    qDebug() << "DisConnected...";
 }
 
 
