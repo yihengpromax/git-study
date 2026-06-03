@@ -3,6 +3,7 @@ bin/
 
 # build
 MyChatDemo/build/
+MyChatServer/build/
 
 # Logs
 logs
@@ -10,5 +11,6 @@ logs
 
 # user
 MyChatDemo/.qtcreator/
+MyChatServer/.qtcreator/
 *.pro.user
 *.pro.user.4.8-pre1
