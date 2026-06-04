@@ -179,7 +179,7 @@ void LoginFrame::OnBtnLoginClicked()
                 instanceDlg.setText("正在登录...");
                 instanceDlg.startLoading();
             }
-            m_pNetworkMgr->ConnectToServer("127.0.0.1", LINSTEN_PORT, [&](bool bOK)
+            m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT, [&](bool bOK)
            {
                if (bOK)
                {

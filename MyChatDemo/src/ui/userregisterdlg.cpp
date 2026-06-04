@@ -175,7 +175,7 @@ void UserRegisterDlg::OnBtnAcceptClicked()
     if (!instanceDlg.IsStarted()) instanceDlg.startLoading();
     if (m_pNetworkMgr)
     {
-        m_pNetworkMgr->ConnectToServer("127.0.0.1", LINSTEN_PORT, [&](bool bOK)
+        m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT, [&](bool bOK)
         {
             if (bOK)
             {
