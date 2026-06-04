@@ -107,8 +107,7 @@ void UserRegisterDlg::InitConnect()
 {
     // Button
     {
-        connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &UserRegisterDlg::OnBtnAcceptClicked);
-        connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &UserRegisterDlg::OnBtnRejectClicked);
+        connect(ui->btn_register, &QPushButton::clicked, this, &UserRegisterDlg::OnBtnAcceptClicked);
     }
 
     // LineEdit

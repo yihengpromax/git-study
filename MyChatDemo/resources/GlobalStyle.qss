@@ -71,40 +71,6 @@ QCheckBox::indicator:checked {
     image: url(:/resources/icon/checked.png);
 }
 
-/* ========== 链接按钮（用于注册账号/找回密码） ========== */
-QPushButton#LinkButton {
-    background: transparent;
-    border: none;
-    color: #0A75F0;
-    font-size: 12px;
-    font-weight: 500;
-    text-decoration: underline;
-}
-
-QPushButton#LinkButton:hover {
-    color: #52A9FF;
-}
-
-/* ========== 登录主按钮 ========== */
-QPushButton#LoginButton {
-    background-color: #0A75F0;
-    border-radius: 40px;
-    border: none;
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    padding: 10px 0;
-    font-family: inherit;
-}
-
-QPushButton#LoginButton:hover {
-    background-color: #0D6BE0;
-}
-
-QPushButton#LoginButton:pressed {
-    background-color: #095acb;
-}
-
 
 
 /* ========== 分割线（可选装饰） ========== */
