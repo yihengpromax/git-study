@@ -32,7 +32,7 @@ private slots:
     void OnCkbAutoLoginStateChanged(Qt::CheckState state);
     void OnCkbRememberStateChanged(Qt::CheckState state);
     void OnComboboxCurTextChanged(const QString& sText);
-    void OnLoginResult(bool ok, int userId);
+    void OnLoginResult(bool ok, int userId, const QString& err);
     void OnConnectedServer();
     void OnDisconnectedServer();
 

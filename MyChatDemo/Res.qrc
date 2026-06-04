@@ -3,5 +3,9 @@
         <file>resources/GlobalStyle.qss</file>
         <file>resources/icon/MyChat.ico</file>
         <file>resources/icon/checked.png</file>
+        <file>resources/icon/error.png</file>
+        <file>resources/icon/eye.png</file>
+        <file>resources/icon/eye_hide.png</file>
+        <file>resources/icon/right.png</file>
     </qresource>
 </RCC>

@@ -17,10 +17,11 @@ public:
     void InitWindow();
 
 public:
-    static bool ShowMainWindow(QWidget* parent);
+    static bool ShowMainWindow(QWidget* parent, const QString& sUserName);
 
 private:
     Ui::MainWindow *ui;
+    QString m_sUserName;
 };
 
 #endif // MAINWINDOW_H

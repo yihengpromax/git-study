@@ -26,8 +26,8 @@ bool Database::Init(const QString &host, const QString &dbname,
     query.exec("CREATE TABLE IF NOT EXISTS users ("
                "id INT AUTO_INCREMENT PRIMARY KEY,"
                "username VARCHAR(32) UNIQUE NOT NULL,"
-               "password_hash CHAR(64) NOT NULL,"
-               "salt CHAR(32) NOT NULL,"
+               "password_hash CHAR(256) NOT NULL,"
+               "salt CHAR(128) NOT NULL,"
                "nickname VARCHAR(64),"
                "sex INT NOT NULL,"
                "birth VARCHAR(16) NOT NULL,"
@@ -53,28 +53,43 @@ static QString HashPassword(const QString &pwd, const QString &salt)
     return QCryptographicHash::hash(combined, QCryptographicHash::Sha256).toHex();
 }
 
-bool Database::UserLogin(const QString &username, const QString &password, int &userId)
+bool Database::UserLogin(const QString &username, const QString &password, int &userId, QString& err)
 {
+    bool bRst = true;
     QSqlQuery q(QSqlDatabase::database("conn1"));
-    q.prepare("SELECT id, password_hash, salt FROM users WHERE username = :name");
-    q.bindValue(":name", username);
-    if (!q.exec() || !q.next()) return false;
-    QString hashStored = q.value(1).toString();
-    QString salt = q.value(2).toString();
-    if (HashPassword(password, salt) != hashStored) return false;
-    userId = q.value(0).toInt();
-    UpdateUserOnline(userId, true);
+    do
+    {
+        q.prepare("SELECT id, password_hash, salt FROM users WHERE username = :name");
+        q.bindValue(":name", username);
+        if (!q.exec() || !q.next())
+        {
+            err = q.lastError().text();
+            bRst = false;
+            break;
+        }
+        QString hashStored = q.value(1).toString();
+        QString salt = q.value(2).toString();
+        if (HashPassword(password, salt) != hashStored)
+        {
+            bRst = false;
+            break;
+        }
+        userId = q.value(0).toInt();
+        UpdateUserOnline(userId, true, err);
+    }while(0);
+    err = q.lastError().text();
 
-    return true;
+    return bRst;
 }
 
-bool Database::UserRegister(const QString &username, const QString &password, const QString &nickname, int sex, const QString &birth, const QString &signature)
+bool Database::UserRegister(const QString &username, const QString &password, const QString &nickname,
+                            int sex, const QString &birth, const QString &signature, QString& err)
 {
     QString salt = QString::number(rand()) + QString::number(QDateTime::currentMSecsSinceEpoch());
     salt = QCryptographicHash::hash(salt.toUtf8(), QCryptographicHash::Sha256).toHex().left(32);
     QString pwdHash = HashPassword(password, salt);
     QSqlQuery q(QSqlDatabase::database("conn1"));
-    q.prepare("INSERT INTO users (username, password_hash, salt, nickname, sex, birth, signature) VALUES (:u, :h, :s, :n, :sex, :brith, :signature)");
+    q.prepare("INSERT INTO users (username, password_hash, salt, nickname, sex, birth, signature) VALUES (:u, :h, :s, :n, :sex, :birth, :signature)");
     q.bindValue(":u", username);
     q.bindValue(":h", pwdHash);
     q.bindValue(":s", salt);
@@ -83,18 +98,27 @@ bool Database::UserRegister(const QString &username, const QString &password, co
     q.bindValue(":birth", birth);
     q.bindValue(":signature", signature);
 
-    return q.exec();
+    bool bRst = q.exec();
+    err = q.lastError().text();
+
+    return bRst;
 }
 
-QList<UserInfo> Database::GetFriendList(int userId)
+QList<UserInfo> Database::GetFriendList(int userId, QString& err)
 {
     QList<UserInfo> list;
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("SELECT u.id, u.username, u.nickname, u.online FROM users u "
               "JOIN friends f ON (f.friend_id = u.id) WHERE f.user_id = :uid");
     q.bindValue(":uid", userId);
-    if (!q.exec()) return list;
-    while (q.next()) {
+    if (!q.exec())
+    {
+        err = q.lastError().text();
+        return list;
+    }
+
+    while (q.next())
+    {
         UserInfo info;
         info.id = q.value(0).toInt();
         info.username = q.value(1).toString();
@@ -106,17 +130,21 @@ QList<UserInfo> Database::GetFriendList(int userId)
     return list;
 }
 
-bool Database::AddFriend(int userId, int friendId)
+bool Database::AddFriend(int userId, int friendId, QString& err)
 {
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("INSERT IGNORE INTO friends (user_id, friend_id) VALUES (:u, :f)");
     q.bindValue(":u", userId);
     q.bindValue(":f", friendId);
 
-    return q.exec();
+    bool bRst = q.exec();
+    err = q.lastError().text();
+
+    return bRst;
 }
 
-bool Database::StoreOfflineMsg(int fromId, int toId, const QString &content) {
+bool Database::StoreOfflineMsg(int fromId, int toId, const QString &content, QString& err)
+{
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("INSERT INTO offline_messages (from_id, to_id, content, timestamp) "
               "VALUES (:f, :t, :c, NOW())");
@@ -124,17 +152,26 @@ bool Database::StoreOfflineMsg(int fromId, int toId, const QString &content) {
     q.bindValue(":t", toId);
     q.bindValue(":c", content);
 
-    return q.exec();
+    bool bRst = q.exec();
+    err = q.lastError().text();
+
+    return bRst;
 }
 
-QList<QStringList> Database::GetOfflineMsgs(int userId)
+QList<QStringList> Database::GetOfflineMsgs(int userId, QString& err)
 {
     QList<QStringList> msgs;
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("SELECT from_id, content, timestamp FROM offline_messages WHERE to_id = :uid");
     q.bindValue(":uid", userId);
-    if (!q.exec()) return msgs;
-    while (q.next()) {
+    if (!q.exec())
+    {
+        err = q.lastError().text();
+        return msgs;
+    }
+
+    while (q.next())
+    {
         QStringList msg;
         msg << QString::number(q.value(0).toInt()) << q.value(1).toString() << q.value(2).toString();
         msgs.append(msg);
@@ -143,30 +180,42 @@ QList<QStringList> Database::GetOfflineMsgs(int userId)
     return msgs;
 }
 
-bool Database::ClearOfflineMsgs(int userId)
+bool Database::ClearOfflineMsgs(int userId, QString& err)
 {
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("DELETE FROM offline_messages WHERE to_id = :uid");
     q.bindValue(":uid", userId);
+    bool bRst = q.exec();
+    err = q.lastError().text();
 
-    return q.exec();
+    return bRst;
 }
 
-void Database::UpdateUserOnline(int userId, bool online)
+void Database::UpdateUserOnline(int userId, bool online, QString& err)
 {
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("UPDATE users SET online = :o WHERE id = :id");
     q.bindValue(":o", online);
     q.bindValue(":id", userId);
     q.exec();
+    err = q.lastError().text();
 }
 
-int Database::GetUserIdByUsername(const QString &username)
+int Database::GetUserIdByUsername(const QString &username, QString& err)
 {
+    int iRst = -1;
     QSqlQuery q(QSqlDatabase::database("conn1"));
-    q.prepare("SELECT id FROM users WHERE username = :name");
-    q.bindValue(":name", username);
-    if (q.exec() && q.next()) return q.value(0).toInt();
+    do
+    {
+        q.prepare("SELECT id FROM users WHERE username = :name");
+        q.bindValue(":name", username);
+        if (q.exec() && q.next())
+        {
+            iRst = q.value(0).toInt();
+            break;
+        }
+    }while(0);
+    err = q.lastError().text();
 
-    return -1;
+    return iRst;
 }

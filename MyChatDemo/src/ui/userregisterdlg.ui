@@ -109,41 +109,6 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>个性签名：</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>生日：</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>确认密码：</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>密码：</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>性别：</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="1">
           <widget class="QLineEdit" name="lineedit_nickname">
            <property name="minimumSize">
@@ -151,6 +116,13 @@
              <width>0</width>
              <height>25</height>
             </size>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>密码：</string>
            </property>
           </widget>
          </item>
@@ -162,6 +134,19 @@
              <height>25</height>
             </size>
            </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="placeholderText">
+            <string>密码由8-16位组成，使用两种以上字符</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>确认密码：</string>
+           </property>
           </widget>
          </item>
          <item row="3" column="1">
@@ -171,6 +156,19 @@
              <width>0</width>
              <height>25</height>
             </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="placeholderText">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>性别：</string>
            </property>
           </widget>
          </item>
@@ -199,8 +197,12 @@
            </item>
           </widget>
          </item>
-         <item row="6" column="1">
-          <widget class="QTextEdit" name="textedit_signatrue"/>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>生日：</string>
+           </property>
+          </widget>
          </item>
          <item row="5" column="1">
           <widget class="QDateEdit" name="dateedit_birth">
@@ -214,17 +216,27 @@
             <date>
              <year>2026</year>
              <month>6</month>
-             <day>13</day>
+             <day>4</day>
             </date>
            </property>
            <property name="minimumDate">
             <date>
              <year>1826</year>
              <month>6</month>
-             <day>13</day>
+             <day>4</day>
             </date>
            </property>
           </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>个性签名：</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QPlainTextEdit" name="textedit_signatrue"/>
          </item>
         </layout>
        </widget>

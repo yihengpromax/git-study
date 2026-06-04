@@ -26,9 +26,7 @@ NetworkManager::NetworkManager(QObject *parent)
     connect(m_socket, &QTcpSocket::connected, this, &NetworkManager::OnSocketConnected);
     connect(m_socket, &QTcpSocket::disconnected, this, &NetworkManager::OnSocketDisconnected);
     connect(m_socket, &QTcpSocket::readyRead, this, &NetworkManager::OnReadyRead);
-    connect(m_socket, &QTcpSocket::errorOccurred, [this](QAbstractSocket::SocketError) {
-        emit ErrorOccurred(m_socket->errorString());
-    });
+    connect(m_socket, &QTcpSocket::errorOccurred, this, &NetworkManager::OnErrorOccurred);
 }
 
 NetworkManager::~NetworkManager()
@@ -36,8 +34,9 @@ NetworkManager::~NetworkManager()
 
 }
 
-void NetworkManager::ConnectToServer(const QString &host, quint16 port)
+void NetworkManager::ConnectToServer(const QString &host, quint16 port, std::function<void (bool)> callback)
 {
+    m_funcConnCallback = callback;
     m_socket->connectToHost(host, port);
 }
 
@@ -82,6 +81,18 @@ void NetworkManager::SendGetFriendList()
     SendPacket(Msg_GetFriendList, QByteArray());
 }
 
+void NetworkManager::SendRegisterUser(const QString &username, const QString &password, const QString &nickname, int sex, const QString &birth, const QString &signature)
+{
+    QJsonObject obj;
+    obj["username"] = username;
+    obj["password"] = password;
+    obj["nickname"] = nickname;
+    obj["sex"] = sex;
+    obj["birth"] = birth;
+    obj["signature"] = signature;
+    SendPacket(Msg_Register, QJsonDocument(obj).toJson());
+}
+
 bool NetworkManager::IsOnline()
 {
     return m_bOnline;
@@ -97,7 +108,8 @@ void NetworkManager::OnReadyRead() {
             QJsonDocument doc = QJsonDocument::fromJson(body);
             bool ok = doc.object()["result"].toString() == "ok";
             int userId = doc.object()["userId"].toInt();
-            emit LoginResult(ok, userId);
+            QString err = doc.object()["error"].toString();
+            emit LoginResult(ok, userId, err);
             break;
         }
         case Msg_FriendList: {
@@ -120,6 +132,13 @@ void NetworkManager::OnReadyRead() {
             emit StatusUpdateReceived(userId, online);
             break;
         }
+        case Msg_Register: {
+            QJsonDocument doc = QJsonDocument::fromJson(body);
+            bool ok = doc.object()["result"].toString() == "ok";
+            QString err = doc.object()["error"].toString();
+            emit RegisterResult(ok, err);
+            break;
+        }
         case Msg_Pong:
             // 心跳响应，无需处理
             break;
@@ -132,6 +151,12 @@ void NetworkManager::OnReadyRead() {
 void NetworkManager::OnSocketConnected()
 {
     emit Connected();
+    if (m_funcConnCallback)
+    {
+        m_funcConnCallback(true);
+        m_funcConnCallback = nullptr;
+    }
+
     m_bOnline = true;
     // 启动心跳定时器
     QTimer *timer = new QTimer(this);
@@ -143,4 +168,14 @@ void NetworkManager::OnSocketDisconnected()
 {
     m_bOnline = false;
     emit Disconnected();
+}
+
+void NetworkManager::OnErrorOccurred(QAbstractSocket::SocketError error)
+{
+    emit ErrorOccurred(m_socket->errorString());
+    if (m_funcConnCallback)
+    {
+        m_funcConnCallback(false);
+        m_funcConnCallback = nullptr;
+    }
 }

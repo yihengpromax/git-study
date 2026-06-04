@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setWindowIcon(ResourceLoader::loadIconResouse(":/resources/icon/MyChat.ico"));
     app.setStyleSheet(ResourceLoader::loadTextResource(":/resources/GlobalStyle.qss"));
+    app.setQuitOnLastWindowClosed(true);
 
     // Test
     QStringList sLst = Util::SplitStr("abcgdefgghjgkl", "g");

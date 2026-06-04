@@ -12,6 +12,7 @@ enum MessageType {
     Msg_Logout         = 0x03,
     Msg_Ping           = 0x04,
     Msg_Pong           = 0x05,
+    Msg_Register       = 0x06,
     Msg_Chat           = 0x10,
     Msg_ChatAck        = 0x11,
     Msg_GetFriendList  = 0x20,

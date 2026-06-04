@@ -25,8 +25,7 @@ LoginFrame::LoginFrame(QWidget *parent)
 
     // m_pNetworkMgr
     m_pNetworkMgr = NetworkManager::GetInstance(this);
-    connect(m_pNetworkMgr, &NetworkManager::Connected, this, &LoginFrame::OnConnectedServer);
-    connect(m_pNetworkMgr, &NetworkManager::Disconnected, this, &LoginFrame::OnDisconnectedServer);
+    // connect(m_pNetworkMgr, &NetworkManager::Disconnected, this, &LoginFrame::OnDisconnectedServer);
     connect(m_pNetworkMgr, &NetworkManager::LoginResult, this, &LoginFrame::OnLoginResult);
 }
 
@@ -174,17 +173,29 @@ void LoginFrame::OnBtnLoginClicked()
 
         if (m_pNetworkMgr)
         {
-            m_pNetworkMgr->ConnectToServer("127.0.0.1", LINSTEN_PORT);
-            LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
-            if (!instance.IsStarted())
+            LoadingBubbleDialog& instanceDlg = LoadingBubbleDialog::GetInstance();
+            if (!instanceDlg.IsStarted())
             {
-                instance.setText("正在登录...");
-                instance.startLoading();
+                instanceDlg.setText("正在登录...");
+                instanceDlg.startLoading();
             }
+            m_pNetworkMgr->ConnectToServer("127.0.0.1", LINSTEN_PORT, [&](bool bOK)
+           {
+               if (bOK)
+               {
+                   m_pNetworkMgr->SendLogin(m_sCurUserID, m_sCurPassword);
+               }
+               else
+               {
+                   LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
+                   if (instance.IsStarted()) instance.stopLoading();
+                   QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
+               }
+           });
         }
         else
         {
-            QMessageBox::information(this, tr("Tips"), tr("Can't Connect Server..."));
+            QMessageBox::information(this, tr("Tips"), tr("Can't Init Network..."));
         }
     }
     else
@@ -221,7 +232,7 @@ void LoginFrame::OnCkbRememberStateChanged(Qt::CheckState state)
 {
     if (state == Qt::Checked)
     {
-         m_bRememberPassword = true;
+        m_bRememberPassword = true;
         // TODO
     }
     else
@@ -244,7 +255,7 @@ void LoginFrame::OnComboboxCurTextChanged(const QString &sText)
     localSet.endGroup();
 }
 
-void LoginFrame::OnLoginResult(bool ok, int userId)
+void LoginFrame::OnLoginResult(bool ok, int userId, const QString& err)
 {
     LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
     if (instance.IsStarted()) instance.stopLoading();
@@ -261,8 +272,7 @@ void LoginFrame::OnLoginResult(bool ok, int userId)
         localSet.setValue("RememberPassword", m_bRememberPassword);
         localSet.setValue("AutoLogin", m_bAutoLogin);
         localSet.endGroup();
-
-        MainWindow::ShowMainWindow(this);
+        MainWindow::ShowMainWindow(nullptr, m_sCurUserID);
         this->deleteLater();
     }
     else

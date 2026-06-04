@@ -39,9 +39,9 @@ private:
     void ProcessPacket(ClientInfo *info, quint16 type, const QByteArray &body);
     void SendMessage(QTcpSocket *socket, quint16 type, const QByteArray &body);
     void BroadcastStatus(int userId, bool online);
-    void SendFriendList(ClientInfo *info);
-    void ForwardChatMessage(int fromId, const QString &toUsername, const QString &content);
-    void SendOfflineMessages(ClientInfo *info);
+    void SendFriendList(ClientInfo *info, QString& err);
+    void ForwardChatMessage(int fromId, const QString &toUsername, const QString &content, QString& err);
+    void SendOfflineMessages(ClientInfo *info, QString& err);
 };
 
 #endif // SERVER_H

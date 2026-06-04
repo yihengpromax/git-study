@@ -1,6 +1,10 @@
 #pragma once
 #define APP_VERSION "1.26.0601"
 #define MASTER_KEY "THIS_IS_A_TEST_KEY"
+#define MAX_USERNAME_LEN 32
+#define MAX_PASSWORD_LEN 16
+#define MAX_NICKNAME_LEN 64
+#define MAX_SIGTEXT_LEN 128
 
 // 编码
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)

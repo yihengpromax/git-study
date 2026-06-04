@@ -80,7 +80,9 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
         QString username = doc.object()["username"].toString();
         QString password = doc.object()["password"].toString();
         int userId;
-        if (Database::UserLogin(username, password, userId)) {
+        QString err;
+        if (Database::UserLogin(username, password, userId, err))
+        {
             info->userId = userId;
             info->username = username;
             m_userSocket[userId] = info->socket;
@@ -92,49 +94,84 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
             SendMessage(info->socket, Msg_LoginResult, QJsonDocument(resp).toJson());
 
             // 发送好友列表
-            SendFriendList(info);
+            SendFriendList(info, err);
 
             // 发送离线消息
-            SendOfflineMessages(info);
+            SendOfflineMessages(info, err);
 
             // 广播在线状态
             BroadcastStatus(userId, true);
         }
-        else {
+        else
+        {
             QJsonObject resp;
             resp["result"] = "fail";
+            resp["error"] = err;
             SendMessage(info->socket, Msg_LoginResult, QJsonDocument(resp).toJson());
             info->socket->disconnectFromHost();
         }
     }
-    else if (type == Msg_Logout) {
+    else if (type == Msg_Logout)
+    {
         if (info->userId != -1)
         {
-            Database::UpdateUserOnline(info->userId, false);
+            QString err;
+            Database::UpdateUserOnline(info->userId, false, err);
             BroadcastStatus(info->userId, false);
             m_userSocket.remove(info->userId);
         }
         info->socket->disconnectFromHost();
     }
-    else if (type == Msg_Ping) {
+    else if (type == Msg_Ping)
+    {
         SendMessage(info->socket, Msg_Pong, QByteArray());
     }
-    else if (type == Msg_GetFriendList) {
-        SendFriendList(info);
+    else if (type == Msg_GetFriendList)
+    {
+        QString err;
+        SendFriendList(info, err);
     }
-    else if (type == Msg_Chat) {
+    else if (type == Msg_Chat)
+    {
+        QString err;
         QJsonDocument doc = QJsonDocument::fromJson(body);
         if (doc.isNull()) return;
         QString toUsername = doc.object()["to"].toString();
         QString content = doc.object()["content"].toString();
-        ForwardChatMessage(info->userId, toUsername, content);
+        ForwardChatMessage(info->userId, toUsername, content, err);
     }
-    else if(type == Msg_AddFriend){
+    else if(type == Msg_AddFriend)
+    {
         QJsonDocument doc = QJsonDocument::fromJson(body);
         if (doc.isNull()) return;
         int userId = doc.object()["userId"].toInt();
         int friendId = doc.object()["friendId"].toInt();
-        Database::AddFriend(userId, friendId);
+        QString err;
+        Database::AddFriend(userId, friendId, err);
+    }
+    else if (type == Msg_Register)
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(body);
+        if (doc.isNull()) return;
+        QString username = doc.object()["username"].toString();
+        QString password = doc.object()["password"].toString();
+        QString nickname = doc.object()["nickname"].toString();
+        int sex = doc.object()["sex"].toInt();
+        QString birth = doc.object()["birth"].toString();
+        QString signature = doc.object()["signature"].toString();
+        QString err;
+        QJsonObject resp;
+        if (Database::UserRegister(username, password, nickname, sex, birth, signature, err))
+        {
+            resp["result"] = "ok";
+        }
+        else
+        {
+            resp["result"] = "fail";
+            resp["error"] = err;
+        }
+        SendMessage(info->socket, Msg_Register, QJsonDocument(resp).toJson());
+        info->socket->disconnectFromHost();
     }
     else if (type == Msg_ChatAck) {
         // 可选：消息确认，本示例忽略
@@ -163,9 +200,9 @@ void ChatServer::BroadcastStatus(int userId, bool online)
     }
 }
 
-void ChatServer::SendFriendList(ClientInfo *info)
+void ChatServer::SendFriendList(ClientInfo *info, QString& err)
 {
-    QList<UserInfo> friends = Database::GetFriendList(info->userId);
+    QList<UserInfo> friends = Database::GetFriendList(info->userId, err);
     QJsonArray arr;
     for (const auto &f : friends)
     {
@@ -181,9 +218,9 @@ void ChatServer::SendFriendList(ClientInfo *info)
     SendMessage(info->socket, Msg_FriendList, QJsonDocument(root).toJson());
 }
 
-void ChatServer::ForwardChatMessage(int fromId, const QString &toUsername, const QString &content)
+void ChatServer::ForwardChatMessage(int fromId, const QString &toUsername, const QString &content, QString& err)
 {
-    int toId = Database::GetUserIdByUsername(toUsername);
+    int toId = Database::GetUserIdByUsername(toUsername, err);
     if (toId == -1) return;
     QJsonObject msg;
     msg["fromUserId"] = fromId;
@@ -194,13 +231,13 @@ void ChatServer::ForwardChatMessage(int fromId, const QString &toUsername, const
         QTcpSocket *toSocket = m_userSocket[toId];
         SendMessage(toSocket, Msg_Chat, body);
     } else {
-        Database::StoreOfflineMsg(fromId, toId, content);
+        Database::StoreOfflineMsg(fromId, toId, content, err);
     }
 }
 
-void ChatServer::SendOfflineMessages(ClientInfo *info)
+void ChatServer::SendOfflineMessages(ClientInfo *info, QString& err)
 {
-    auto msgs = Database::GetOfflineMsgs(info->userId);
+    auto msgs = Database::GetOfflineMsgs(info->userId, err);
     for (const auto &msg : msgs) {
         int fromId = msg[0].toInt();
         QString content = msg[1];
@@ -211,7 +248,7 @@ void ChatServer::SendOfflineMessages(ClientInfo *info)
         obj["timestamp"] = 0;
         SendMessage(info->socket, Msg_Chat, QJsonDocument(obj).toJson());
     }
-    Database::ClearOfflineMsgs(info->userId);
+    Database::ClearOfflineMsgs(info->userId, err);
 }
 
 void ChatServer::OnDisconnected()
@@ -219,8 +256,10 @@ void ChatServer::OnDisconnected()
     QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
     if (!socket || !m_clients.contains(socket)) return;
     ClientInfo *info = m_clients[socket];
-    if (info->userId != -1) {
-        Database::UpdateUserOnline(info->userId, false);
+    if (info->userId != -1)
+    {
+        QString err;
+        Database::UpdateUserOnline(info->userId, false, err);
         BroadcastStatus(info->userId, false);
         m_userSocket.remove(info->userId);
     }
