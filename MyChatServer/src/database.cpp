@@ -8,16 +8,23 @@ static QSqlDatabase db;
 bool Database::Init(const QString &host, const QString &dbname,
                     const QString &user, const QString &pass)
 {
-    db = QSqlDatabase::addDatabase("QODBC", "conn1");
-    db.setDatabaseName(
-        QString("DRIVER={MySQL ODBC 9.7 Unicode Driver};"
-                "SERVER=%1;DATABASE=%2;USER=%3;PASSWORD=%4;CHARSET=utf8mb4;")
-            .arg(host, dbname, user, pass));
-    if (!db.open())
-    {
-        qDebug() << "DB error:" << db.lastError().text();
-        return false;
-    }
+    // db = QSqlDatabase::addDatabase("QODBC", "conn1");
+    // db.setDatabaseName(
+    //     QString("DRIVER={MySQL ODBC 9.7 Unicode Driver};"
+    //             "SERVER=%1;DATABASE=%2;USER=%3;PASSWORD=%4;CHARSET=utf8mb4;")
+    //         .arg(host, dbname, user, pass));
+    // if (!db.open())
+    // {
+    //     qDebug() << "DB error:" << db.lastError().text();
+    //     return false;
+    // }
+
+    db = QSqlDatabase::addDatabase("QMYSQL", "conn1");
+    db.setHostName(host);   // 本地 MySQL 服务
+    db.setPort(3306);
+    db.setDatabaseName(dbname);
+    db.setUserName(user);
+    db.setPassword(pass);
 
     // 创建表（如果不存在）
     QSqlQuery query(QSqlDatabase::database("conn1")); // 当只存在一个数据库连接时，参数QSqlDatabase::database("conn1")可以省略
