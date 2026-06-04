@@ -1,7 +1,7 @@
 # git-study
 
 
-# git的高阶用法请访问下面的链接
+# 一、git的高阶用法请访问下面的链接
 https://www.cnblogs.com/jamiechoo/articles/18408791
 
 
@@ -169,3 +169,8 @@ git push
 忽略特定文件：secret.txt（忽略secret.txt文件）
 ```
 
+
+
+# 二、以下的项目注意事项
+
+TODO

@@ -34,9 +34,9 @@ ChatServer::~ChatServer()
 void ChatServer::Start(quint16 port)
 {
     if (listen(QHostAddress::Any, port))
-        qDebug() << "====================================== Server listening on port" << port;
+        qDebug() << "[Info] Server listening on port" << port;
     else
-        qDebug() << "====================================== Failed to start server";
+        qDebug() << "[Error] Failed to start server";
 }
 
 void ChatServer::incomingConnection(qintptr handle)
@@ -50,7 +50,7 @@ void ChatServer::incomingConnection(qintptr handle)
     m_clients[socket] = info;
     connect(socket, &QTcpSocket::readyRead, this, &ChatServer::OnReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, &ChatServer::OnDisconnected);
-    qDebug() << "====================================== Connected.";
+    qDebug() << "[Info] Connected: " << socket->localAddress();
 }
 
 void ChatServer::OnReadyRead()
@@ -173,7 +173,8 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
         SendMessage(info->socket, Msg_Register, QJsonDocument(resp).toJson());
         info->socket->disconnectFromHost();
     }
-    else if (type == Msg_ChatAck) {
+    else if (type == Msg_ChatAck)
+    {
         // 可选：消息确认，本示例忽略
     }
 }
@@ -193,8 +194,10 @@ void ChatServer::BroadcastStatus(int userId, bool online)
     QByteArray packet = PackMessage(Msg_StatusUpdate, body);
     // 向该用户的所有好友广播（简单实现：遍历在线用户，只发送给好友）
     // 实际应查好友表，这里为简化，广播给所有在线客户端（仅演示）
-    for (auto *cli : m_clients) {
-        if (cli->userId != userId && cli->userId != -1) {
+    for (auto *cli : m_clients)
+    {
+        if (cli->userId != userId && cli->userId != -1)
+        {
             cli->socket->write(packet);
         }
     }
@@ -227,10 +230,12 @@ void ChatServer::ForwardChatMessage(int fromId, const QString &toUsername, const
     msg["content"] = content;
     msg["timestamp"] = QDateTime::currentMSecsSinceEpoch();
     QByteArray body = QJsonDocument(msg).toJson();
-    if (m_userSocket.contains(toId)) {
+    if (m_userSocket.contains(toId))
+    {
         QTcpSocket *toSocket = m_userSocket[toId];
         SendMessage(toSocket, Msg_Chat, body);
-    } else {
+    } else
+    {
         Database::StoreOfflineMsg(fromId, toId, content, err);
     }
 }
@@ -238,7 +243,8 @@ void ChatServer::ForwardChatMessage(int fromId, const QString &toUsername, const
 void ChatServer::SendOfflineMessages(ClientInfo *info, QString& err)
 {
     auto msgs = Database::GetOfflineMsgs(info->userId, err);
-    for (const auto &msg : msgs) {
+    for (const auto &msg : msgs)
+    {
         int fromId = msg[0].toInt();
         QString content = msg[1];
         // 重新构造Chat消息发给客户端
@@ -264,21 +270,26 @@ void ChatServer::OnDisconnected()
         m_userSocket.remove(info->userId);
     }
     delete info;
+    qDebug() << "Disconnected From: " << socket->localAddress();
     m_clients.remove(socket);
     socket->deleteLater();
-    qDebug() << "Disconnected";
+
 }
 
 void ChatServer::OnHeartbeat()
 {
     qint64 now = QDateTime::currentMSecsSinceEpoch();
     QList<QTcpSocket*> timeoutList;
-    for (auto *info : m_clients) {
-        if (now - info->lastHeartbeat > 60000) { // 60秒无心跳则断开
+    for (auto *info : m_clients)
+    {
+        if (now - info->lastHeartbeat > 60000)
+        { // 60秒无心跳则断开
             timeoutList.append(info->socket);
         }
     }
-    for (auto *sock : timeoutList) {
+
+    for (auto *sock : timeoutList)
+    {
         sock->disconnectFromHost();
     }
 }
