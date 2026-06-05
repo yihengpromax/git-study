@@ -61,6 +61,7 @@ void SpinnerWidget::paintEvent(QPaintEvent *event)
 
 
 // ========== LoadingBubbleDialog 实现 ==========
+LoadingBubbleDialog *LoadingBubbleDialog::m_pInstance = nullptr;
 LoadingBubbleDialog::LoadingBubbleDialog(const QString &text, QWidget *parent)
     : QDialog(parent)
     , m_bStarted(false)
@@ -145,10 +146,14 @@ bool LoadingBubbleDialog::IsStarted()
     return m_bStarted;
 }
 
-LoadingBubbleDialog& LoadingBubbleDialog::GetInstance()
+LoadingBubbleDialog* LoadingBubbleDialog::GetInstance(const QString &text, QWidget *parent)
 {
-    static LoadingBubbleDialog instance;
-    return instance;
+    if (!m_pInstance)
+    {
+        m_pInstance = new LoadingBubbleDialog(text, parent);
+    }
+
+    return m_pInstance;
 }
 
 void LoadingBubbleDialog::startLoading()

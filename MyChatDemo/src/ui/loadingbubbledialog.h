@@ -44,7 +44,7 @@ public:
     bool IsStarted();
 
 public:
-    static LoadingBubbleDialog& GetInstance();
+    static LoadingBubbleDialog* GetInstance(const QString &text = tr("正在加载..."), QWidget *parent = nullptr);
 
 public slots:
     void startLoading();      // 显示并开始动画
@@ -52,6 +52,9 @@ public slots:
 
 private:
     void centerOnParent();    // 居中于父窗口或屏幕
+
+public:
+    static LoadingBubbleDialog *m_pInstance;
 
 private:
     SpinnerWidget *m_spinner;

@@ -22,8 +22,6 @@ enum MessageType {
     Msg_OfflineMsg     = 0x30
 };
 
-#define LINSTEN_PORT 12580
-
 // 协议包结构：长度(quint32) + 类型(quint16) + 体(QByteArray)
 struct MessagePacket
 {

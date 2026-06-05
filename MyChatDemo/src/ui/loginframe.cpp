@@ -173,12 +173,8 @@ void LoginFrame::OnBtnLoginClicked()
 
         if (m_pNetworkMgr)
         {
-            LoadingBubbleDialog& instanceDlg = LoadingBubbleDialog::GetInstance();
-            if (!instanceDlg.IsStarted())
-            {
-                instanceDlg.setText("正在登录...");
-                instanceDlg.startLoading();
-            }
+            LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Logging in..."), this);
+            if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
             m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT, [&](bool bOK)
            {
                if (bOK)
@@ -187,8 +183,8 @@ void LoginFrame::OnBtnLoginClicked()
                }
                else
                {
-                   LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
-                   if (instance.IsStarted()) instance.stopLoading();
+                    LoadingBubbleDialog* instance = LoadingBubbleDialog::GetInstance();
+                   if (instance->IsStarted()) instance->stopLoading();
                    QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
                }
            });
@@ -257,8 +253,8 @@ void LoginFrame::OnComboboxCurTextChanged(const QString &sText)
 
 void LoginFrame::OnLoginResult(bool ok, int userId, const QString& err)
 {
-    LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
-    if (instance.IsStarted()) instance.stopLoading();
+    LoadingBubbleDialog* instance = LoadingBubbleDialog::GetInstance();
+    if (instance->IsStarted()) instance->stopLoading();
     if (ok)
     {
         QString qsGroupName = "User_" + m_sCurUserID;

@@ -1,8 +1,11 @@
+#include "../stdafx.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "../core/networkmanager.h"
 
 #include <QScreen>
+#include <QPushButton>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,7 +14,20 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     m_pNetWorkMgr = NetworkManager::GetInstance(this);
-
+    // QTimer* timer = new QTimer(this);
+    // connect(timer, &QTimer::timeout, this, [&](){
+    //     if (m_pNetWorkMgr)
+    //     {
+    //         if (m_pNetWorkMgr->IsOnline())
+    //             ui->statusBar->showMessage(tr("Connected."));
+    //         else
+    //         {
+    //            ui->statusBar->showMessage(tr("Disconnected."));
+    //            if (m_pNetWorkMgr && !m_pNetWorkMgr->IsOnline()) m_pNetWorkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT);
+    //         }
+    //     }
+    // });
+    // timer->start(3000);
 }
 
 MainWindow::~MainWindow()
@@ -22,6 +38,7 @@ MainWindow::~MainWindow()
 void MainWindow::InitWindow()
 {
     setWindowTitle(tr("Welcome"));
+    ui->statusBar->showMessage(tr("Connected."));
     ui->lab_username->setText(tr("Welcome USER: %1").arg(m_sUserName));
 }
 

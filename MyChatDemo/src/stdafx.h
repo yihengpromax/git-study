@@ -6,7 +6,7 @@
 #define MAX_NICKNAME_LEN 64
 #define MAX_SIGTEXT_LEN 128
 #define SERVER_IP "118.89.19.108"
-
+#define LINSTEN_PORT 12580
 // 编码
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)
 //MSVC编译时，源码中的字符能保持Utf-8

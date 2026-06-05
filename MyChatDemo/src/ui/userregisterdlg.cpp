@@ -2,7 +2,6 @@
 #include "userregisterdlg.h"
 #include "ui_userregisterdlg.h"
 #include "../core/networkmanager.h"
-#include "../protocol.h"
 #include "loadingbubbledialog.h"
 
 #include <QMessageBox>
@@ -171,12 +170,9 @@ void UserRegisterDlg::OnBtnAcceptClicked()
     }
 
     // NOTE: 发送注册指令并等待结果
-    LoadingBubbleDialog& instanceDlg = LoadingBubbleDialog::GetInstance();
-    if (!instanceDlg.IsStarted())
-    {
-        instanceDlg.setText(tr("Please wait..."));
-        instanceDlg.startLoading();
-    }
+    LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Please wait..."), this);
+    if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
+
     if (m_pNetworkMgr)
     {
         m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT, [&](bool bOK)
@@ -189,8 +185,8 @@ void UserRegisterDlg::OnBtnAcceptClicked()
             }
             else
             {
-                LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
-                if (instance.IsStarted()) instance.stopLoading();
+                LoadingBubbleDialog* instance = LoadingBubbleDialog::GetInstance();
+                if (instance->IsStarted()) instance->stopLoading();
                 QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
             }
         });
@@ -237,8 +233,8 @@ void UserRegisterDlg::OnLineEditTextChanged()
 
 void UserRegisterDlg::OnRegisterResult(bool bOk, const QString& err)
 {
-    LoadingBubbleDialog& instance = LoadingBubbleDialog::GetInstance();
-    if (instance.IsStarted()) instance.stopLoading();
+    LoadingBubbleDialog* instance = LoadingBubbleDialog::GetInstance();
+    if (instance->IsStarted()) instance->stopLoading();
     if (bOk)
     {
         QMessageBox::information(this, tr("Tips"), tr("Register Ok!"));

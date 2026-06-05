@@ -1,9 +1,9 @@
 #include "../stdafx.h"
 #include "utils.h"
 
-#include <iostream>
 #include <QProcessEnvironment>
 #include <QStandardPaths>
+#include <iostream>
 
 Utils::Logger::Logger()
     : m_LogLevel(LogLevel::LevelInfo)
@@ -144,7 +144,7 @@ void Utils::Logger::Debug(const QStringList& msgLst)
 void Utils::Logger::InitLogger(LogLevel level, LogMode mode)
 {
     SetLoggerRule(level, mode);
-    QString startLog = QString("Version: %1 Time: %2").arg(APP_VERSION).arg(GetCurrentDateTime());
+    QString startLog = QString("Version: %1  Time: %2").arg(APP_VERSION).arg(GetCurrentDateTime());
     Info({startLog});
 }
 

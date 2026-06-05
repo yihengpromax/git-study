@@ -47,13 +47,11 @@ void ChatServer::Start(quint16 port)
 {
     if (listen(QHostAddress::Any, port))
     {
-        QString sLog = QString("Server listening on port: %1").arg(port);
-        Utils::Logger::GetLogger().Info(sLog);
+        Utils::Logger::GetLogger().Info(QString("Server listening on port: %1").arg(port));
     }
     else
     {
-        QString sLog = QString("Failed to start server: %1").arg(errorString());
-        Utils::Logger::GetLogger().Error(sLog);
+        Utils::Logger::GetLogger().Error(QString("Failed to start server: %1").arg(errorString()));
     }
 }
 
@@ -64,8 +62,7 @@ void ChatServer::incomingConnection(qintptr handle)
     QTcpSocket *socket = new QTcpSocket(this);
     if (!socket->setSocketDescriptor(handle))
     {
-        QString sLog = QString("SetSocketDescriptor failed: %1").arg(socket->errorString());
-        Utils::Logger::GetLogger().Error(sLog);
+        Utils::Logger::GetLogger().Error(QString("SetSocketDescriptor failed: %1").arg(socket->errorString()));
         delete socket;
         return;
     }
@@ -80,8 +77,7 @@ void ChatServer::incomingConnection(qintptr handle)
 
     connect(socket, &QTcpSocket::readyRead, this, &ChatServer::OnReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, &ChatServer::OnDisconnected);
-    QString sLog = QString("Connected: %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort());
-    Utils::Logger::GetLogger().Info(sLog);
+    Utils::Logger::GetLogger().Info(QString("Connected: %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
 }
 
 void ChatServer::KickClient(QTcpSocket *socket)
@@ -100,7 +96,7 @@ void ChatServer::OnReadyRead()
     ClientInfo *info = m_clients[socket];
     info->recvBuffer.append(socket->readAll());
 
-    // 防止恶意客户端撑爆内存
+    // 防止撑爆内存
     if (info->recvBuffer.size() > BUFFER_LIMIT)
     {
         Utils::Logger::GetLogger().Warning("Recv buffer overflow, kicking client.");
@@ -133,8 +129,7 @@ void ChatServer::SendMessage(QTcpSocket *socket, quint16 type, const QByteArray 
     qint64 written = socket->write(packet);
     if (written == -1)
     {
-        QString sLog = QString("Write failed: %1").arg(socket->errorString());
-        Utils::Logger::GetLogger().Error(sLog);
+        Utils::Logger::GetLogger().Error(QString("Write failed: %1").arg(socket->errorString()));
         KickClient(socket);
     }
 }
@@ -375,8 +370,7 @@ void ChatServer::OnAckTimeout()
                     msg["timestamp"] = pm.timestamp;
                     SendMessage(m_userSocket[pm.toId], Msg_Chat,
                                 QJsonDocument(msg).toJson());
-                    QString sLog = QString("Retry msg: %1 attempt: %2").arg(pm.msgId).arg(pm.retryCount);
-                    Utils::Logger::GetLogger().Info(sLog);
+                    Utils::Logger::GetLogger().Info(QString("Retry msg: %1 attempt: %2").arg(pm.msgId).arg(pm.retryCount));
                 }
                 else
                 {
@@ -398,8 +392,7 @@ void ChatServer::OnAckTimeout()
         QString err;
         Database::StoreOfflineMsg(pm.fromId, pm.toId, pm.content, err);
         NotifySender(pm.fromId, pm.msgId, "stored_offline");
-        QString sLog = QString("Msg: %1 ACK timeout, stored offline").arg(pm.msgId);
-        Utils::Logger::GetLogger().Info(sLog);
+        Utils::Logger::GetLogger().Info(QString("Msg: %1 ACK timeout, stored offline").arg(pm.msgId));
     }
 }
 
@@ -468,8 +461,7 @@ void ChatServer::OnDisconnected()
     if (!socket || !m_clients.contains(socket)) return;
 
     ClientInfo *info = m_clients.take(socket);
-    QString sLog = QString("Disconnected: %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort());
-    Utils::Logger::GetLogger().Info(sLog);
+    Utils::Logger::GetLogger().Info(QString("Disconnected: %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
 
     if (info->userId != -1)
     {
