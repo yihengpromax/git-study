@@ -20,13 +20,18 @@ NetworkManager* NetworkManager::GetInstance(QObject *parent)
 
 NetworkManager::NetworkManager(QObject *parent)
     : QObject(parent)
-    , m_bOnline(false)
+    , m_funcConnCallback(nullptr)
 {
     m_socket = new QTcpSocket(this);
     connect(m_socket, &QTcpSocket::connected, this, &NetworkManager::OnSocketConnected);
     connect(m_socket, &QTcpSocket::disconnected, this, &NetworkManager::OnSocketDisconnected);
     connect(m_socket, &QTcpSocket::readyRead, this, &NetworkManager::OnReadyRead);
     connect(m_socket, &QTcpSocket::errorOccurred, this, &NetworkManager::OnErrorOccurred);
+
+    // 启动心跳定时器
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &NetworkManager::SendPing);
+    timer->start(30000);
 }
 
 NetworkManager::~NetworkManager()
@@ -42,7 +47,8 @@ void NetworkManager::ConnectToServer(const QString &host, quint16 port, std::fun
 
 void NetworkManager::SendPacket(quint16 type, const QByteArray &body)
 {
-    if (m_socket->state() == QAbstractSocket::ConnectedState) {
+    if (m_socket->state() == QAbstractSocket::ConnectedState)
+    {
         m_socket->write(PackMessage(type, body));
     }
 }
@@ -95,15 +101,18 @@ void NetworkManager::SendRegisterUser(const QString &username, const QString &pa
 
 bool NetworkManager::IsOnline()
 {
-    return m_bOnline;
+    return (m_socket->state() == QAbstractSocket::ConnectedState);
 }
 
-void NetworkManager::OnReadyRead() {
+void NetworkManager::OnReadyRead()
+{
     m_recvBuffer.append(m_socket->readAll());
     quint16 type;
     QByteArray body;
-    while (UnpackMessage(m_recvBuffer, type, body)) {
-        switch (type) {
+    while (UnpackMessage(m_recvBuffer, type, body))
+    {
+        switch (type)
+        {
         case Msg_LoginResult: {
             QJsonDocument doc = QJsonDocument::fromJson(body);
             bool ok = doc.object()["result"].toString() == "ok";
@@ -156,17 +165,10 @@ void NetworkManager::OnSocketConnected()
         m_funcConnCallback(true);
         m_funcConnCallback = nullptr;
     }
-
-    m_bOnline = true;
-    // 启动心跳定时器
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &NetworkManager::SendPing);
-    timer->start(30000);
 }
 
 void NetworkManager::OnSocketDisconnected()
 {
-    m_bOnline = false;
     emit Disconnected();
 }
 

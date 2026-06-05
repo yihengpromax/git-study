@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "server.h"
 #include "database.h"
+#include "protocol.h"
+#include "utils/utils.h"
 
 #include <QCoreApplication>
 
@@ -8,14 +10,19 @@ int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
 
-    // 初始化数据库连接（修改为你的MySQL配置）
+    // NOTE: InitLogger
+    Utils::Logger::GetLogger().InitLogger(Utils::LogLevel::LevelInfo, Utils::LogMode::Both);
+
+    // NOTE: InitDatabase
     if (!Database::Init("localhost", "mychatdb", "root", "123456"))
     {
-        qDebug() << "Available drivers:" << QSqlDatabase::drivers();
-        qDebug() << "Database init failed...";
+        Utils::Logger::GetLogger().Error("Database init failed...");
+        Utils::Logger::GetLogger().Info("Available drivers: ");
+        Utils::Logger::GetLogger().Info(QSqlDatabase::drivers());
         return 1;
     }
 
+    // NOTE: InitServer
     ChatServer server;
     server.Start(LINSTEN_PORT);
     return app.exec();

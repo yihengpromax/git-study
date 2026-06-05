@@ -172,7 +172,11 @@ void UserRegisterDlg::OnBtnAcceptClicked()
 
     // NOTE: 发送注册指令并等待结果
     LoadingBubbleDialog& instanceDlg = LoadingBubbleDialog::GetInstance();
-    if (!instanceDlg.IsStarted()) instanceDlg.startLoading();
+    if (!instanceDlg.IsStarted())
+    {
+        instanceDlg.setText(tr("Please wait..."));
+        instanceDlg.startLoading();
+    }
     if (m_pNetworkMgr)
     {
         m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT, [&](bool bOK)

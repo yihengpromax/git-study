@@ -7,6 +7,7 @@ namespace Ui {
 class MainWindow;
 }
 
+class NetworkManager;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -22,6 +23,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QString m_sUserName;
+    NetworkManager *m_pNetWorkMgr;
 };
 
 #endif // MAINWINDOW_H

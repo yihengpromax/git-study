@@ -24,6 +24,13 @@ enum MessageType {
 
 #define LINSTEN_PORT 12580
 
+static const int BUFFER_LIMIT = 1024 * 1024;          // 1MB 接收缓冲上限
+static const int SEND_BUFFER_LIMIT = 512 * 1024;      // 512KB 发送缓冲上限
+static const int HEARTBEAT_TIMEOUT = 60000;            // 60秒心跳超时
+static const int LOGIN_TIMEOUT = 15000;                // 15秒登录超时
+static const int ACK_TIMEOUT = 10000;                  // 10秒 ACK 超时
+static const int ACK_MAX_RETRY = 2;                    // ACK 最大重试次数
+
 // 协议包结构：长度(quint32) + 类型(quint16) + 体(QByteArray)
 struct MessagePacket
 {

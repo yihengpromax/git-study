@@ -1,3 +1,3 @@
 #pragma once
 
-#include "protocol.h"
+#define APP_VERSION "1.0.0.260605_beta"

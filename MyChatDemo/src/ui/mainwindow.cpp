@@ -1,13 +1,17 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "../core/networkmanager.h"
 
 #include <QScreen>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , m_pNetWorkMgr(nullptr)
 {
     ui->setupUi(this);
+    m_pNetWorkMgr = NetworkManager::GetInstance(this);
+
 }
 
 MainWindow::~MainWindow()
