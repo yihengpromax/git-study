@@ -38,7 +38,7 @@ void Utils::Logger::Error(const QString& msg)
     if (m_LogLevel >= LogLevel::LevelError)
     {
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
-            std::cout << "[ERROR]: " << msg.toUtf8().data();
+            std::cout << "[ERROR]: " << msg.toUtf8().data() << std::endl;
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
             WriteLogToLocalFile(LogLevel::LevelError, QIODevice::Append, {msg});
@@ -50,7 +50,7 @@ void Utils::Logger::Warning(const QString& msg)
     if (m_LogLevel >= LogLevel::LevelWarning)
     {
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
-            std::cout << "[WARNING]: " << msg.toUtf8().data();
+            std::cout << "[WARNING]: " << msg.toUtf8().data() << std::endl;
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
             WriteLogToLocalFile(LogLevel::LevelWarning, QIODevice::Append, {msg});
@@ -62,7 +62,7 @@ void Utils::Logger::Info(const QString& msg)
     if (m_LogLevel >= LogLevel::LevelInfo)
     {
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
-            std::cout << "[INFO]: " << msg.toUtf8().data();
+            std::cout << "[INFO]: " << msg.toUtf8().data() << std::endl;
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
             WriteLogToLocalFile(LogLevel::LevelInfo, QIODevice::Append, {msg});
@@ -74,7 +74,7 @@ void Utils::Logger::Debug(const QString& msg)
     if (m_LogLevel >= LogLevel::LevelDebug)
     {
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
-            std::cout << "[DEBUG]: " << msg.toUtf8().data();
+            std::cout << "[DEBUG]: " << msg.toUtf8().data() << std::endl;
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
             WriteLogToLocalFile(LogLevel::LevelDebug, QIODevice::Append, {msg});
@@ -88,7 +88,7 @@ void Utils::Logger::Error(const QStringList& msgLst)
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
         {
             for (auto &it : msgLst)
-                std::cout << "[ERROR]: " << it.toUtf8().data();
+                std::cout << "[ERROR]: " << it.toUtf8().data() << std::endl;
         }
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
@@ -103,7 +103,7 @@ void Utils::Logger::Warning(const QStringList& msgLst)
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
         {
             for (auto &it : msgLst)
-                std::cout << "[WARNING]: " << it.toUtf8().data();
+                std::cout << "[WARNING]: " << it.toUtf8().data() << std::endl;
         }
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
@@ -118,7 +118,7 @@ void Utils::Logger::Info(const QStringList& msgLst)
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
         {
             for (auto &it : msgLst)
-                std::cout << "[INFO]: " << it.toUtf8().data();
+                std::cout << "[INFO]: " << it.toUtf8().data() << std::endl;
         }
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
@@ -133,7 +133,7 @@ void Utils::Logger::Debug(const QStringList& msgLst)
         if (m_logMode == LogMode::PrintOnly || m_logMode == LogMode::Both)
         {
             for (auto &it : msgLst)
-                std::cout << "[DEBUG]: " << it.toUtf8().data();
+                std::cout << "[DEBUG]: " << it.toUtf8().data() << std::endl;
         }
 
         if (m_logMode == LogMode::FileOnly || m_logMode == LogMode::Both)
