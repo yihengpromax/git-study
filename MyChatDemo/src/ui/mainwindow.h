@@ -16,9 +16,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void InitWindow();
+    void InitConnect();
 
 public:
     static bool ShowMainWindow(QWidget* parent, const QString& sUserName);
+
+private slots:
+    void OnBtnSendClicked();
 
 private:
     Ui::MainWindow *ui;

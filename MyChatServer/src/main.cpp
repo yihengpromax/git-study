@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
             if (0 == line.compare("bye"))
             {
                 std::cout << "bye." << std::endl;
-                app.quit();
+                app.quit(); // 跨线程操作
                 break;
             }
             else if(0 == line.compare("version"))
@@ -45,11 +45,9 @@ int main(int argc, char *argv[])
             }
             else if(0 == line.compare("help"))
             {
-                std::cout << R"(
-                    help        Print HelpInfo.
-                    version     Print Version.
-                    bye         exit app.
-                )" << std::endl;
+                std::cout << R"(help        Print HelpInfo.
+                                version     Print Version.
+                                bye         exit app.)" << std::endl;
             }
         }
     });

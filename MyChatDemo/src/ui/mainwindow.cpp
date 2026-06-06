@@ -6,6 +6,7 @@
 #include <QScreen>
 #include <QPushButton>
 #include <QTimer>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_pNetWorkMgr(nullptr)
 {
     ui->setupUi(this);
-    m_pNetWorkMgr = NetworkManager::GetInstance(this);
+    m_pNetWorkMgr = NetworkManager::GetInstance();
 }
 
 MainWindow::~MainWindow()
@@ -24,7 +25,12 @@ MainWindow::~MainWindow()
 void MainWindow::InitWindow()
 {
     setWindowTitle(tr("Welcome[%1]").arg(m_sUserName));
+    InitConnect();
+}
 
+void MainWindow::InitConnect()
+{
+    connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::OnBtnSendClicked);
 }
 
 bool MainWindow::ShowMainWindow(QWidget *parent, const QString& sUserName)
@@ -44,4 +50,23 @@ bool MainWindow::ShowMainWindow(QWidget *parent, const QString& sUserName)
     }
 
     return true;
+}
+
+void MainWindow::OnBtnSendClicked()
+{
+    if (!ui->inputEdit->toPlainText().isEmpty())
+    {
+        if (m_pNetWorkMgr && m_pNetWorkMgr->IsOnline())
+        {
+            m_pNetWorkMgr->SendChat("wed", ui->inputEdit->toPlainText());
+            ui->messageDisplay->append(m_sUserName + ":");
+            ui->messageDisplay->append(ui->inputEdit->toPlainText());
+        }
+        else
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
+        }
+
+        ui->inputEdit->clear();
+    }
 }
