@@ -24,6 +24,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // NOTE: InitServer
+    ChatServer server;
+    server.Start(LINSTEN_PORT);
+
     // NOTE: Init Commandline Input
     std::thread th([&](){
         std::string line;
@@ -33,13 +37,24 @@ int main(int argc, char *argv[])
             {
                 std::cout << "bye." << std::endl;
                 app.quit();
+                break;
+            }
+            else if(0 == line.compare("version"))
+            {
+                std::cout << APP_VERSION << std::endl;
+            }
+            else if(0 == line.compare("help"))
+            {
+                std::cout << R"(
+                    help        Print HelpInfo.
+                    version     Print Version.
+                    bye         exit app.
+                )" << std::endl;
             }
         }
     });
+    int exitcode = app.exec();
+    if (th.joinable()) th.join();
 
-    // NOTE: InitServer
-    ChatServer server;
-    server.Start(LINSTEN_PORT);
-
-    return app.exec();
+    return exitcode;
 }
