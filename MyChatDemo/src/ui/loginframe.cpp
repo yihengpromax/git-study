@@ -24,7 +24,8 @@ LoginFrame::LoginFrame(QWidget *parent)
     ui->setupUi(this);
 
     // m_pNetworkMgr
-    m_pNetworkMgr = NetworkManager::GetInstance(this);
+    m_pNetworkMgr = NetworkManager::GetInstance();
+    m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT);
     // connect(m_pNetworkMgr, &NetworkManager::Disconnected, this, &LoginFrame::OnDisconnectedServer);
     connect(m_pNetworkMgr, &NetworkManager::LoginResult, this, &LoginFrame::OnLoginResult);
 }
@@ -171,27 +172,15 @@ void LoginFrame::OnBtnLoginClicked()
         m_bRememberPassword = ui->cb_remember_password->isChecked();
         m_bAutoLogin = ui->cb_auto_login->isChecked();
 
-        if (m_pNetworkMgr)
+        if (m_pNetworkMgr && m_pNetworkMgr->IsOnline())
         {
             LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Logging in..."), this);
             if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
-            m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT, [&](bool bOK)
-           {
-               if (bOK)
-               {
-                   m_pNetworkMgr->SendLogin(m_sCurUserID, m_sCurPassword);
-               }
-               else
-               {
-                    LoadingBubbleDialog* instance = LoadingBubbleDialog::GetInstance();
-                   if (instance->IsStarted()) instance->stopLoading();
-                   QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
-               }
-           });
+            m_pNetworkMgr->SendLogin(m_sCurUserID, m_sCurPassword);
         }
         else
         {
-            QMessageBox::information(this, tr("Tips"), tr("Can't Init Network..."));
+            QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
         }
     }
     else

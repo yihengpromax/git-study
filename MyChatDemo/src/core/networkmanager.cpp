@@ -13,7 +13,7 @@ NetworkManager* NetworkManager::m_instance = nullptr;
 NetworkManager* NetworkManager::GetInstance(QObject *parent)
 {
     if (!m_instance)
-        m_instance = new NetworkManager(parent);
+        m_instance = new NetworkManager(parent); // 在合适的时机释放
 
     return m_instance;
 }
@@ -132,6 +132,13 @@ void NetworkManager::OnReadyRead()
             QString content = doc.object()["content"].toString();
             qint64 ts = doc.object()["timestamp"].toVariant().toLongLong();
             emit ChatMessageReceived(fromUserId, content, ts);
+            break;
+        }
+        case Msg_ChatAck: {
+            QJsonDocument doc = QJsonDocument::fromJson(body);
+            QString msgId = doc.object()["msgId"].toString();
+            QString status = doc.object()["status"].toString();
+            emit ChatMsgResult(msgId, status);
             break;
         }
         case Msg_StatusUpdate: {

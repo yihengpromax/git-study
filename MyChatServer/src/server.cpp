@@ -281,7 +281,8 @@ int ChatServer::ResolveUserId(const QString &username, QString &err)
     // 缓存未命中才查库（离线用户）
     int id = Database::GetUserIdByUsername(username, err);
     if (id != -1)
-        m_usernameToId[username] = id;  // 缓存结果
+        m_usernameToId[username] = id;
+
     return id;
 }
 
@@ -291,6 +292,7 @@ void ChatServer::ForwardChatMessage(int fromId, const QString &toUsername,
     int toId = ResolveUserId(toUsername, err);
     if (toId == -1) return;
 
+    Utils::Logger::GetLogger().Info(QString("ID %1 Send Msg[%2] to %3").arg(fromId).arg(content).arg(toId));
     QString msgId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
 
@@ -502,10 +504,10 @@ void ChatServer::OnHeartbeat()
         {
             timeoutList.append(info->socket);
         }
-        else if (info->userId == -1 && now - info->lastHeartbeat > LOGIN_TIMEOUT)
-        {
-            timeoutList.append(info->socket);
-        }
+        // else if (info->userId == -1 && now - info->lastHeartbeat > LOGIN_TIMEOUT)
+        // {
+        //     timeoutList.append(info->socket);
+        // }
     }
 
     for (auto *sock : timeoutList)

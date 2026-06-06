@@ -17,7 +17,8 @@ UserRegisterDlg::UserRegisterDlg(QWidget *parent)
     ui->setupUi(this);
 
     // m_pNetworkMgr
-    m_pNetworkMgr = NetworkManager::GetInstance(this);
+    m_pNetworkMgr = NetworkManager::GetInstance();
+    m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT);
     connect(m_pNetworkMgr, &NetworkManager::RegisterResult, this, &UserRegisterDlg::OnRegisterResult);
 }
 
@@ -170,26 +171,17 @@ void UserRegisterDlg::OnBtnAcceptClicked()
     }
 
     // NOTE: 发送注册指令并等待结果
-    LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Please wait..."), this);
-    if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
-
-    if (m_pNetworkMgr)
+    if (m_pNetworkMgr && m_pNetworkMgr->IsOnline())
     {
-        m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT, [&](bool bOK)
-        {
-            if (bOK)
-            {
-                m_pNetworkMgr->SendRegisterUser(ui->lineedit_username->text(), ui->lineedit_enpassword->text(),
-                                                ui->lineedit_nickname->text(), ui->cb_sex->currentIndex(),
-                                                ui->dateedit_birth->date().toString(), ui->textedit_signatrue->toPlainText());
-            }
-            else
-            {
-                LoadingBubbleDialog* instance = LoadingBubbleDialog::GetInstance();
-                if (instance->IsStarted()) instance->stopLoading();
-                QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
-            }
-        });
+        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Please wait..."), this);
+        if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
+        m_pNetworkMgr->SendRegisterUser(ui->lineedit_username->text(), ui->lineedit_enpassword->text(),
+                                        ui->lineedit_nickname->text(), ui->cb_sex->currentIndex(),
+                                        ui->dateedit_birth->date().toString(), ui->textedit_signatrue->toPlainText());
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
     }
 }
 

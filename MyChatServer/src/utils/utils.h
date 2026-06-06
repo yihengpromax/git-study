@@ -41,20 +41,11 @@ QString GetAppDataDirPath(const QString &defaultPath);
 bool WriteLogToLocalFile(LogLevel logLevel, QIODevice::OpenModeFlag qFlag, QStringList sLogLst);
 
 // 带颜色的终端输出
-void printf_red(const char *s)
-{
-    printf("\033[0m\033[1;31m%s\n\033[0m", s);
-}
+void printfRed(const char *s);
 
-void printf_green(const char *s)
-{
-    printf("\033[0m\033[1;32m%s\n\033[0m", s);
-}
+void printfGreen(const char *s);
 
-void printf_yellow(const char *s)
-{
-    printf("\033[0m\033[1;33m%s\n\033[0m", s);
-}
+void printfYellow(const char *s);
 
 /***************************************************************
 @author: yiheng

@@ -1,6 +1,7 @@
 #include "ui/loginframe.h"
 #include "utils/util.h"
 #include "utils/resourceloader.h"
+#include "core/networkmanager.h"
 
 #include <QApplication>
 
@@ -25,7 +26,6 @@ int main(int argc, char *argv[])
         delete frame;
         frame = nullptr;
     }
-
 
     return exitcode;
 }

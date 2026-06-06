@@ -26,6 +26,7 @@ signals:
     void LoginResult(bool ok, int userId, const QString &err);
     void FriendListReceived(const QJsonArray &friends);
     void ChatMessageReceived(int fromUserId, const QString &content, qint64 timestamp);
+    void ChatMsgResult(const QString& msgId, const QString& msg);
     void StatusUpdateReceived(int userId, bool online);
     void ErrorOccurred(const QString &err);
     void RegisterResult(bool ok, const QString &err);

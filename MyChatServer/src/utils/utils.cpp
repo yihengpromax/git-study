@@ -5,6 +5,21 @@
 #include <QStandardPaths>
 #include <iostream>
 
+void Utils::printfRed(const char *s)
+{
+    printf("\033[0m\033[1;31m%s\n\033[0m", s);
+}
+
+void Utils::printfGreen(const char *s)
+{
+    printf("\033[0m\033[1;32m%s\n\033[0m", s);
+}
+
+void Utils::printfYellow(const char *s)
+{
+    printf("\033[0m\033[1;33m%s\n\033[0m", s);
+}
+
 Utils::Logger::Logger()
     : m_LogLevel(LogLevel::LevelInfo)
     , m_logMode(LogMode::PrintOnly)
