@@ -52,7 +52,7 @@ MainWindow::~MainWindow()
 void MainWindow::InitWindow()
 {
     setWindowTitle(tr("Welcome[%1]").arg(m_sUserName));
-    ui->labStatus->setText(APP_VERSION);
+    ui->labVersion->setText(APP_VERSION);
     InitConnect();
 }
 

@@ -176,7 +176,7 @@ void UserRegisterDlg::OnBtnAcceptClicked()
     // NOTE: 发送注册指令并等待结果
     if (IsOnline())
     {
-        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Please wait..."), this);
+        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Please wait..."), nullptr);
         if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
         emit Registered(ui->lineedit_username->text(), ui->lineedit_enpassword->text(),
                                         ui->lineedit_nickname->text(), ui->cb_sex->currentIndex(),

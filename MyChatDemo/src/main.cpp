@@ -37,9 +37,6 @@ int main(int argc, char *argv[])
         {
             thNetwork.terminate();
         }
-
-        delete frame;
-        frame = nullptr;
     }
 
     return exitcode;

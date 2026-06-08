@@ -176,7 +176,7 @@ void LoginFrame::OnBtnLoginClicked()
 
         if (IsOnline())
         {
-            LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Logging in..."), this);
+            LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Logging in..."), nullptr);
             if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
             emit Logged(m_sCurUserID, m_sCurPassword);
         }
