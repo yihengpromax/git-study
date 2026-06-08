@@ -132,6 +132,7 @@ void MainWindow::OnBtnAddFriendClicked()
     if (!ui->usernameInput->text().isEmpty())
     {
         emit SendAddFriendReq(m_sUserName, ui->usernameInput->text());
+        ui->usernameInput->clear();
     }
     else
     {
