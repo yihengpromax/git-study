@@ -11,6 +11,7 @@
 #include <QUuid>
 #include <QTimer>
 #include <QTcpSocket>
+#include <QThread>
 
 ChatServer::ChatServer(QObject *parent) : QTcpServer(parent)
 {
@@ -20,9 +21,9 @@ ChatServer::ChatServer(QObject *parent) : QTcpServer(parent)
     m_heartbeatTimer->start(30000);
 
     // ACK 超时检测定时器
-    m_ackTimer = new QTimer(this);
-    connect(m_ackTimer, &QTimer::timeout, this, &ChatServer::OnAckTimeout);
-    m_ackTimer->start(5000);
+    // m_ackTimer = new QTimer(this);
+    // connect(m_ackTimer, &QTimer::timeout, this, &ChatServer::OnAckTimeout);
+    // m_ackTimer->start(5000);
 }
 
 ChatServer::~ChatServer()
@@ -179,8 +180,9 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
             resp["nickname"] = username;
             SendMessage(info->socket, Msg_LoginResult, QJsonDocument(resp).toJson());
 
-            SendFriendList(info, err);
-            SendOfflineMessages(info, err);
+            // NOTE: 与UI相关的由客户端主动调取
+            // SendFriendList(info, err);
+            // SendOfflineMessages(info, err);
             BroadcastStatus(userId, true);
         }
         else
@@ -279,6 +281,15 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
         info->socket->flush();
         info->socket->disconnectFromHost();
     }
+    else if (type == Msg_OfflineMsg)
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(body);
+        if (doc.isNull()) return;
+        QString username = doc.object()["username"].toString();
+        QString err;
+        info->username = username;
+        SendOfflineMessages(info, err);
+    }
 }
 
 // ======================== 消息转发（核心） ========================
@@ -294,6 +305,26 @@ int ChatServer::ResolveUserId(const QString &username, QString &err)
         m_usernameToId[username] = id;
 
     return id;
+}
+
+QString ChatServer::ResolveUsername(int userId, QString &err)
+{
+    QString sUsername;
+    for (auto it = m_usernameToId.begin(); it != m_usernameToId.end(); ++it)
+    {
+        if (it.value() == userId)
+        {
+            sUsername = it.key();
+            break;
+        }
+    }
+
+    if (sUsername.isEmpty())
+    {
+        sUsername = Database::GetUsernameByUserId(userId, err);
+    }
+
+    return sUsername;
 }
 
 void ChatServer::ForwardChatMessage(const QString & fromUsername, const QString &toUsername,
@@ -377,11 +408,13 @@ void ChatServer::OnAckTimeout()
                 pm.retryCount++;
                 if (m_userSocket.contains(pm.toId))
                 {
+                    QString err;
                     QJsonObject msg;
                     msg["msgId"] = pm.msgId;
                     msg["fromUserId"] = pm.fromId;
                     msg["content"] = pm.content;
                     msg["timestamp"] = pm.timestamp;
+                    msg["fromUsername"] = ResolveUsername(pm.fromId, err);
                     SendMessage(m_userSocket[pm.toId], Msg_Chat,
                                 QJsonDocument(msg).toJson());
                     Utils::Logger::GetLogger().Info(QString("Retry msg: %1 attempt: %2").arg(pm.msgId).arg(pm.retryCount));
@@ -450,7 +483,8 @@ void ChatServer::SendFriendList(ClientInfo *info, QString &err)
 
 void ChatServer::SendOfflineMessages(ClientInfo *info, QString &err)
 {
-    auto msgs = Database::GetOfflineMsgs(info->userId, err);
+    int userId = ResolveUserId(info->username, err);
+    auto msgs = Database::GetOfflineMsgs(userId, err);
     for (const auto &msg : msgs)
     {
         int fromId = msg[0].toInt();
@@ -462,9 +496,10 @@ void ChatServer::SendOfflineMessages(ClientInfo *info, QString &err)
         obj["fromUserId"] = fromId;
         obj["content"] = content;
         obj["timestamp"] = timestamp.toLongLong();
+        obj["fromUsername"] = ResolveUsername(fromId, err);
         SendMessage(info->socket, Msg_Chat, QJsonDocument(obj).toJson());
     }
-    Database::ClearOfflineMsgs(info->userId, err);
+    Database::ClearOfflineMsgs(userId, err);
 }
 
 // ======================== 断线与心跳 ========================

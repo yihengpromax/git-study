@@ -29,6 +29,7 @@ public:
     static bool ClearOfflineMsgs(int userId, QString& err);
     static void UpdateUserOnline(int userId, bool online, QString& err);
     static int GetUserIdByUsername(const QString &username, QString& err);
+    static QString GetUsernameByUserId(int userId, QString& err);
 };
 
 #endif // DATABASE_H

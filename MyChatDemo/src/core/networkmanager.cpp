@@ -111,6 +111,13 @@ void NetworkManager::SendRegisterUser(const QString &username, const QString &pa
     SendPacket(Msg_Register, QJsonDocument(obj).toJson());
 }
 
+void NetworkManager::SendGetofflineMsgReq(const QString &username)
+{
+    QJsonObject obj;
+    obj["username"] = username;
+    SendPacket(Msg_OfflineMsg, QJsonDocument(obj).toJson());
+}
+
 void NetworkManager::onStartConnTimer()
 {
     if (m_pConnTimer && !m_pConnTimer->isActive())

@@ -226,3 +226,22 @@ int Database::GetUserIdByUsername(const QString &username, QString& err)
 
     return iRst;
 }
+
+QString Database::GetUsernameByUserId(int userId, QString &err)
+{
+    QString sRst;
+    QSqlQuery q(QSqlDatabase::database("conn1"));
+    do
+    {
+        q.prepare("SELECT username FROM users WHERE id = :id");
+        q.bindValue(":id", userId);
+        if (q.exec() && q.next())
+        {
+            sRst = q.value(0).toString();
+            break;
+        }
+    }while(0);
+    err = q.lastError().text();
+
+    return sRst;
+}

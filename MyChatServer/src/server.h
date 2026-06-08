@@ -55,6 +55,7 @@ private:
     void KickClient(QTcpSocket *socket);
     void NotifySender(int fromId, const QString &msgId, const QString &status);
     int ResolveUserId(const QString &username, QString &err);
+    QString ResolveUsername(int userId, QString &err);
 
 private:
     QHash<QTcpSocket*, ClientInfo*> m_clients;

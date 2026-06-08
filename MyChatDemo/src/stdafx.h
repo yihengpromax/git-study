@@ -1,5 +1,5 @@
 #pragma once
-#define APP_VERSION "1.26.0601"
+#define APP_VERSION "1.26.0608.1"
 #define MASTER_KEY "THIS_IS_A_TEST_KEY"
 #define MAX_USERNAME_LEN 32
 #define MAX_PASSWORD_LEN 16

@@ -17,6 +17,7 @@ public:
     ~MainWindow();
     void InitWindow();
     void InitConnect();
+    void InitChatInfo();
 
 public:
     static bool ShowMainWindow(QWidget* parent, const QString& sUserName);
@@ -25,6 +26,7 @@ signals:
     void SendChat(const QString &toUsername, const QString &content);
     void SendGetFriendList();
     void SendAddFriend(const QString &username, const QString &friendName);
+    void SendGetOfflineMsg(const QString &username);
 
 private slots:
     void OnBtnSendClicked();
@@ -32,6 +34,9 @@ private slots:
     void OnAddFriendResult(bool ok, const QString& err);
     void OnBtnAddFriendClicked();
     void OnChatMessageReceived(int fromId, const QString & fromUserName, const QString &content, qint64 timestamp);
+
+private:
+    void appendBubble(const QString &text, bool isSelf);
 
 private:
     Ui::MainWindow *ui;

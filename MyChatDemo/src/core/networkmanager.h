@@ -24,6 +24,7 @@ public slots:
     void SendPing();
     void SendGetFriendList();
     void SendRegisterUser(const QString &username, const QString &password, const QString &nickname, int sex, const QString &birth, const QString &signature);
+    void SendGetofflineMsgReq(const QString &username);
     void DoWork();
     void onStartConnTimer();
     void onStopConnTimer();
