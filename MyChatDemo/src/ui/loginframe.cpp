@@ -19,15 +19,17 @@ LoginFrame::LoginFrame(QWidget *parent)
     , ui(new Ui::LoginFrame)
     , m_bRememberPassword(false)
     , m_bAutoLogin(false)
-    , m_pNetworkMgr(nullptr)
+    , m_bOnline(false)
 {
     ui->setupUi(this);
 
-    // m_pNetworkMgr
-    m_pNetworkMgr = NetworkManager::GetInstance();
-    m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT);
-    // connect(m_pNetworkMgr, &NetworkManager::Disconnected, this, &LoginFrame::OnDisconnectedServer);
-    connect(m_pNetworkMgr, &NetworkManager::LoginResult, this, &LoginFrame::OnLoginResult);
+    // pNetworkMgr处于子线程
+    Network::NetworkManager *pNetworkMgr = Network::GetInstance();
+    connect(this, &LoginFrame::Logged, pNetworkMgr, &Network::NetworkManager::SendLogin);
+    connect(pNetworkMgr, &Network::NetworkManager::LoginResult, this, &LoginFrame::OnLoginResult);
+    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
+        m_bOnline = (state == QTcpSocket::ConnectedState);
+    });
 }
 
 LoginFrame::~LoginFrame()
@@ -172,11 +174,11 @@ void LoginFrame::OnBtnLoginClicked()
         m_bRememberPassword = ui->cb_remember_password->isChecked();
         m_bAutoLogin = ui->cb_auto_login->isChecked();
 
-        if (m_pNetworkMgr && m_pNetworkMgr->IsOnline())
+        if (IsOnline())
         {
             LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Logging in..."), this);
             if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
-            m_pNetworkMgr->SendLogin(m_sCurUserID, m_sCurPassword);
+            emit Logged(m_sCurUserID, m_sCurPassword);
         }
         else
         {
@@ -266,15 +268,9 @@ void LoginFrame::OnLoginResult(bool ok, int userId, const QString& err)
     }
 }
 
-void LoginFrame::OnConnectedServer()
+bool LoginFrame::IsOnline()
 {
-    m_pNetworkMgr->SendLogin(m_sCurUserID, m_sCurPassword);
-    qDebug() << "Connected...";
-}
-
-void LoginFrame::OnDisconnectedServer()
-{
-    qDebug() << "DisConnected...";
+    return m_bOnline;
 }
 
 

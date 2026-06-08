@@ -7,14 +7,38 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QMessageBox>
+#include <QJsonArray>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , m_pNetWorkMgr(nullptr)
 {
     ui->setupUi(this);
-    m_pNetWorkMgr = NetworkManager::GetInstance();
+    Network::NetworkManager *pNetworkMgr = Network::GetInstance();
+    connect(this, &MainWindow::SendChat, pNetworkMgr, &Network::NetworkManager::SendChat);
+    connect(ui->refreshButton, &QPushButton::clicked, pNetworkMgr, &Network::NetworkManager::SendGetFriendList);
+    connect(pNetworkMgr, &Network::NetworkManager::FriendListReceived, this, &MainWindow::OnGetFriendList);
+    connect(pNetworkMgr, &Network::NetworkManager::AddFriendResult, this, &MainWindow::OnAddFriendResult);
+    connect(this, &MainWindow::SendAddFriend, pNetworkMgr, &Network::NetworkManager::AddFriend);
+    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
+        switch (state)
+        {
+        case QTcpSocket::SocketState::ConnectedState:
+            ui->labStatus->setText(tr("Connected"));
+            ui->sendButton->setEnabled(true);
+            break;
+        case QTcpSocket::SocketState::UnconnectedState:
+            ui->labStatus->setText(tr("Disconnected"));
+            ui->sendButton->setEnabled(false);
+            break;
+        case QTcpSocket::SocketState::ConnectingState:
+            ui->labStatus->setText(tr("Connecting"));
+            ui->sendButton->setEnabled(false);
+            break;
+        default:
+            break;
+        }
+    });
 }
 
 MainWindow::~MainWindow()
@@ -25,12 +49,14 @@ MainWindow::~MainWindow()
 void MainWindow::InitWindow()
 {
     setWindowTitle(tr("Welcome[%1]").arg(m_sUserName));
+    ui->labStatus->setText(APP_VERSION);
     InitConnect();
 }
 
 void MainWindow::InitConnect()
 {
     connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::OnBtnSendClicked);
+    connect(ui->addFriendButton, &QPushButton::clicked, this, &MainWindow::OnBtnAddFriendClicked);
 }
 
 bool MainWindow::ShowMainWindow(QWidget *parent, const QString& sUserName)
@@ -56,17 +82,39 @@ void MainWindow::OnBtnSendClicked()
 {
     if (!ui->inputEdit->toPlainText().isEmpty())
     {
-        if (m_pNetWorkMgr && m_pNetWorkMgr->IsOnline())
-        {
-            m_pNetWorkMgr->SendChat("wed", ui->inputEdit->toPlainText());
-            ui->messageDisplay->append(m_sUserName + ":");
-            ui->messageDisplay->append(ui->inputEdit->toPlainText());
-        }
-        else
-        {
-            QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
-        }
+        emit SendChat(ui->cbFriendList->currentText(), ui->inputEdit->toPlainText());
+        ui->messageDisplay->append(m_sUserName + ":");
+        ui->messageDisplay->append(ui->inputEdit->toPlainText());
 
         ui->inputEdit->clear();
+    }
+}
+
+void MainWindow::OnGetFriendList(const QJsonArray &friends)
+{
+    qDebug() << "//============================= friendlist ==========================";
+    for (const auto &obj : friends)
+    {
+        qDebug() << obj;
+    }
+}
+
+void MainWindow::OnAddFriendResult(bool ok, const QString& err)
+{
+    ok ? QMessageBox::information(this, tr("Tips"), tr("Add Success！")) : QMessageBox::information(this, tr("Tips"), tr("Add Faild"));
+}
+
+void MainWindow::OnBtnAddFriendClicked()
+{
+    if (m_sUserName.isEmpty())
+        return;
+
+    if (!ui->usernameInput->text().isEmpty())
+    {
+        emit SendAddFriend(m_sUserName, ui->usernameInput->text());
+    }
+    else
+    {
+        QMessageBox::information(this, tr("Tips"), tr("Friend Name is Empty!"));
     }
 }

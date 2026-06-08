@@ -25,6 +25,9 @@ public:
 public:
     static LoginFrame* ShowLoginFrame(QWidget *parent = nullptr);
 
+signals:
+    void Logged(const QString &username, const QString &password);
+
 private slots:
     void OnBtnLoginClicked();
     void OnBtnRegisterClicked();
@@ -33,8 +36,7 @@ private slots:
     void OnCkbRememberStateChanged(Qt::CheckState state);
     void OnComboboxCurTextChanged(const QString& sText);
     void OnLoginResult(bool ok, int userId, const QString& err);
-    void OnConnectedServer();
-    void OnDisconnectedServer();
+    bool IsOnline();
 
 private:
     Ui::LoginFrame *ui;
@@ -42,7 +44,7 @@ private:
     QString m_sCurUserID, m_sCurPassword; // 明文
     QString m_sVersion;
     QStringList m_lstFirstGroupNames;
-    NetworkManager* m_pNetworkMgr;
+    bool m_bOnline;
 };
 
 #endif // LOGINFRAME_H

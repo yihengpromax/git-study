@@ -11,15 +11,18 @@
 UserRegisterDlg::UserRegisterDlg(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::UserRegisterDlg)
-    , m_pNetworkMgr(nullptr)
     , m_bEnsurePasswordOk(false)
+    , m_bOnline(false)
 {
     ui->setupUi(this);
 
     // m_pNetworkMgr
-    m_pNetworkMgr = NetworkManager::GetInstance();
-    m_pNetworkMgr->ConnectToServer(SERVER_IP, LINSTEN_PORT);
-    connect(m_pNetworkMgr, &NetworkManager::RegisterResult, this, &UserRegisterDlg::OnRegisterResult);
+    Network::NetworkManager* pNetworkMgr = Network::GetInstance();
+    connect(this, &UserRegisterDlg::Registered, pNetworkMgr, &Network::NetworkManager::SendRegisterUser);
+    connect(pNetworkMgr, &Network::NetworkManager::RegisterResult, this, &UserRegisterDlg::OnRegisterResult);
+    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
+        m_bOnline = (state == QTcpSocket::ConnectedState);
+    });
 }
 
 UserRegisterDlg::~UserRegisterDlg()
@@ -171,11 +174,11 @@ void UserRegisterDlg::OnBtnAcceptClicked()
     }
 
     // NOTE: 发送注册指令并等待结果
-    if (m_pNetworkMgr && m_pNetworkMgr->IsOnline())
+    if (IsOnline())
     {
         LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Please wait..."), this);
         if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
-        m_pNetworkMgr->SendRegisterUser(ui->lineedit_username->text(), ui->lineedit_enpassword->text(),
+        emit Registered(ui->lineedit_username->text(), ui->lineedit_enpassword->text(),
                                         ui->lineedit_nickname->text(), ui->cb_sex->currentIndex(),
                                         ui->dateedit_birth->date().toString(), ui->textedit_signatrue->toPlainText());
     }
@@ -251,4 +254,9 @@ bool UserRegisterDlg::HasContiansTwoTypeChar(const QString &sText)
     }
 
     return (bHasLetter + bHasNumber + bHasSymbol) >= 2;
+}
+
+bool UserRegisterDlg::IsOnline()
+{
+    return m_bOnline;
 }

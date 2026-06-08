@@ -1,3 +1,4 @@
+#include "../stdafx.h"
 #include "networkmanager.h"
 #include "../protocol.h"
 
@@ -8,48 +9,59 @@
 #include <QDebug>
 #include <QThread>
 
-NetworkManager* NetworkManager::m_instance = nullptr;
-
-NetworkManager* NetworkManager::GetInstance(QObject *parent)
+namespace Network
 {
-    if (!m_instance)
-        m_instance = new NetworkManager(parent); // 在合适的时机释放
+NetworkManager* g_pNetworkMgr = nullptr;
 
-    return m_instance;
+NetworkManager* GetInstance(QTcpSocket *parent)
+{
+    if (!g_pNetworkMgr)
+    {
+        g_pNetworkMgr = new NetworkManager;
+    }
+
+    return g_pNetworkMgr;
 }
 
-NetworkManager::NetworkManager(QObject *parent)
-    : QObject(parent)
+NetworkManager::NetworkManager(QTcpSocket *parent)
+    : QTcpSocket(parent)
     , m_funcConnCallback(nullptr)
+    , m_pConnTimer(nullptr)
+    , m_pPingTimer(nullptr)
 {
-    m_socket = new QTcpSocket(this);
-    connect(m_socket, &QTcpSocket::connected, this, &NetworkManager::OnSocketConnected);
-    connect(m_socket, &QTcpSocket::disconnected, this, &NetworkManager::OnSocketDisconnected);
-    connect(m_socket, &QTcpSocket::readyRead, this, &NetworkManager::OnReadyRead);
-    connect(m_socket, &QTcpSocket::errorOccurred, this, &NetworkManager::OnErrorOccurred);
-
-    // 启动心跳定时器
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &NetworkManager::SendPing);
-    timer->start(30000);
+    qDebug () << "NetworkManager"<< QThread::currentThreadId();
 }
 
 NetworkManager::~NetworkManager()
 {
+    if (m_pPingTimer)
+    {
+        m_pPingTimer->stop();
+        m_pPingTimer->deleteLater();
+        m_pPingTimer = nullptr;
+    }
 
+    if (m_pConnTimer)
+    {
+        m_pConnTimer->stop();
+        m_pConnTimer->deleteLater();
+        m_pConnTimer = nullptr;
+    }
 }
 
 void NetworkManager::ConnectToServer(const QString &host, quint16 port, std::function<void (bool)> callback)
 {
+    qDebug () << "ConnectToServer"<< QThread::currentThreadId();
     m_funcConnCallback = callback;
-    m_socket->connectToHost(host, port);
+    emit UpdateConnState(QTcpSocket::ConnectingState);
+    connectToHost(host, port);
 }
 
 void NetworkManager::SendPacket(quint16 type, const QByteArray &body)
 {
-    if (m_socket->state() == QAbstractSocket::ConnectedState)
+    if (state() == QAbstractSocket::ConnectedState)
     {
-        m_socket->write(PackMessage(type, body));
+        write(PackMessage(type, body));
     }
 }
 
@@ -69,11 +81,11 @@ void NetworkManager::SendChat(const QString &toUsername, const QString &content)
     SendPacket(Msg_Chat, QJsonDocument(obj).toJson());
 }
 
-void NetworkManager::AddFriend(int userId, int friendId)
+void NetworkManager::AddFriend(const QString& userName, const QString& friendName)
 {
     QJsonObject obj;
-    obj["userId"] = userId;
-    obj["friendId"] = friendId;
+    obj["userName"] = userName;
+    obj["friendName"] = friendName;
     SendPacket(Msg_AddFriend, QJsonDocument(obj).toJson());
 }
 
@@ -99,14 +111,55 @@ void NetworkManager::SendRegisterUser(const QString &username, const QString &pa
     SendPacket(Msg_Register, QJsonDocument(obj).toJson());
 }
 
+void NetworkManager::onStartConnTimer()
+{
+    if (m_pConnTimer && !m_pConnTimer->isActive())
+        m_pConnTimer->start();
+}
+
+void NetworkManager::onStopConnTimer()
+{
+    if (m_pConnTimer && m_pConnTimer->isActive())
+        m_pConnTimer->stop();
+}
+
+void NetworkManager::DoWork()
+{
+    emit UpdateConnState(state());
+    if (state() == QTcpSocket::SocketState::UnconnectedState)
+    {
+        ConnectToServer(SERVER_IP, LINSTEN_PORT);
+    }
+}
+
 bool NetworkManager::IsOnline()
 {
-    return (m_socket->state() == QAbstractSocket::ConnectedState);
+    return (state() == QAbstractSocket::ConnectedState);
+}
+
+void NetworkManager::InitNetwork()
+{
+    // NOTE:
+    connect(this, &QTcpSocket::connected, this, &NetworkManager::OnSocketConnected);
+    connect(this, &QTcpSocket::disconnected, this, &NetworkManager::OnSocketDisconnected);
+    connect(this, &QTcpSocket::readyRead, this, &NetworkManager::OnReadyRead);
+    connect(this, &QTcpSocket::errorOccurred, this, &NetworkManager::OnErrorOccurred);
+
+    // NOTE: Request Connection
+    DoWork();
+    m_pConnTimer = new QTimer(this);
+    connect(m_pConnTimer, &QTimer::timeout, this, &NetworkManager::DoWork);
+    m_pConnTimer->start(3000);
+
+    // NOTE: Enable Heartbeat Timer
+    m_pPingTimer = new QTimer(this);
+    connect(m_pPingTimer, &QTimer::timeout, this, &NetworkManager::SendPing);
+    m_pPingTimer->start(30000);
 }
 
 void NetworkManager::OnReadyRead()
 {
-    m_recvBuffer.append(m_socket->readAll());
+    m_recvBuffer.append(readAll());
     quint16 type;
     QByteArray body;
     while (UnpackMessage(m_recvBuffer, type, body))
@@ -148,11 +201,18 @@ void NetworkManager::OnReadyRead()
             emit StatusUpdateReceived(userId, online);
             break;
         }
-        case Msg_Register: {
+        case Msg_RegisterResult: {
             QJsonDocument doc = QJsonDocument::fromJson(body);
             bool ok = doc.object()["result"].toString() == "ok";
             QString err = doc.object()["error"].toString();
             emit RegisterResult(ok, err);
+            break;
+        }
+        case Msg_AddFriendResult:{
+            QJsonDocument doc = QJsonDocument::fromJson(body);
+            bool ok = doc.object()["result"].toString() == "ok";
+            QString err = doc.object()["error"].toString();
+            emit AddFriendResult(ok, err);
             break;
         }
         case Msg_Pong:
@@ -166,7 +226,6 @@ void NetworkManager::OnReadyRead()
 
 void NetworkManager::OnSocketConnected()
 {
-    emit Connected();
     if (m_funcConnCallback)
     {
         m_funcConnCallback(true);
@@ -176,15 +235,17 @@ void NetworkManager::OnSocketConnected()
 
 void NetworkManager::OnSocketDisconnected()
 {
-    emit Disconnected();
+
 }
 
 void NetworkManager::OnErrorOccurred(QAbstractSocket::SocketError error)
 {
-    emit ErrorOccurred(m_socket->errorString());
+    emit ErrorOccurred(errorString());
     if (m_funcConnCallback)
     {
         m_funcConnCallback(false);
         m_funcConnCallback = nullptr;
     }
+}
+
 }

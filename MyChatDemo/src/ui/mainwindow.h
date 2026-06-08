@@ -21,13 +21,20 @@ public:
 public:
     static bool ShowMainWindow(QWidget* parent, const QString& sUserName);
 
+signals:
+    void SendChat(const QString &toUsername, const QString &content);
+    void SendGetFriendList();
+    void SendAddFriend(const QString &username, const QString &friendName);
+
 private slots:
     void OnBtnSendClicked();
+    void OnGetFriendList(const QJsonArray &friends);
+    void OnAddFriendResult(bool ok, const QString& err);
+    void OnBtnAddFriendClicked();
 
 private:
     Ui::MainWindow *ui;
     QString m_sUserName;
-    NetworkManager *m_pNetWorkMgr;
 };
 
 #endif // MAINWINDOW_H

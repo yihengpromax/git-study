@@ -22,6 +22,10 @@ public:
 public:
     static bool ShowUserRegisterDlg(QWidget *parent = nullptr);
 
+signals:
+    void Registered(const QString &username, const QString &password, const QString &nickname, int sex,
+                    const QString &birth, const QString &signature);
+
 private slots:
     void OnBtnAcceptClicked();
     void OnBtnRejectClicked();
@@ -30,11 +34,12 @@ private slots:
 
 private:
     bool HasContiansTwoTypeChar(const QString& sText);
+    bool IsOnline();
 
 private:
     Ui::UserRegisterDlg *ui;
-    NetworkManager* m_pNetworkMgr;
     bool m_bEnsurePasswordOk;
+    bool m_bOnline;
 };
 
 #endif // USERREGISTERDLG_H

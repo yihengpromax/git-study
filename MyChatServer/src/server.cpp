@@ -241,10 +241,20 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
     {
         QJsonDocument doc = QJsonDocument::fromJson(body);
         if (doc.isNull()) return;
-        int userId = doc.object()["userId"].toInt();
-        int friendId = doc.object()["friendId"].toInt();
+        QString userName = doc.object()["userName"].toString();
+        QString friendName = doc.object()["friendName"].toString();
         QString err;
-        Database::AddFriend(userId, friendId, err);
+        int userId = Database::GetUserIdByUsername(userName, err), friendId = Database::GetUserIdByUsername(friendName, err);
+
+        QJsonObject resp;
+        if (Database::AddFriend(userId, friendId, err))
+            resp["result"] = "ok";
+        else
+        {
+            resp["result"] = "fail";
+            resp["error"] = err;
+        }
+        SendMessage(info->socket, Msg_AddFriendResult, QJsonDocument(resp).toJson());
     }
     else if (type == Msg_Register)
     {
@@ -265,7 +275,7 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
             resp["result"] = "fail";
             resp["error"] = err;
         }
-        SendMessage(info->socket, Msg_Register, QJsonDocument(resp).toJson());
+        SendMessage(info->socket, Msg_RegisterResult, QJsonDocument(resp).toJson());
         info->socket->flush();
         info->socket->disconnectFromHost();
     }
