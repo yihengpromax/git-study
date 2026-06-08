@@ -179,12 +179,13 @@ void NetworkManager::OnReadyRead()
             emit FriendListReceived(doc.object()["friends"].toArray());
             break;
         }
-        case Msg_Chat: {
+        case Msg_Chat: { // 接收服务器转发的好友消息
             QJsonDocument doc = QJsonDocument::fromJson(body);
-            int fromUserId = doc.object()["fromUserId"].toInt();
+            int fromId = doc.object()["fromUserId"].toInt();
+            QString fromUserName = doc.object()["fromUsername"].toString();
             QString content = doc.object()["content"].toString();
             qint64 ts = doc.object()["timestamp"].toVariant().toLongLong();
-            emit ChatMessageReceived(fromUserId, content, ts);
+            emit ChatMessageReceived(fromId, fromUserName, content, ts);
             break;
         }
         case Msg_ChatAck: {

@@ -222,7 +222,7 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
         QString toUsername = doc.object()["to"].toString();
         QString content = doc.object()["content"].toString();
         QString err;
-        ForwardChatMessage(info->userId, toUsername, content, err);
+        ForwardChatMessage(info->username, toUsername, content, err);
     }
     else if (type == Msg_ChatAck)
     {
@@ -244,7 +244,7 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
         QString userName = doc.object()["userName"].toString();
         QString friendName = doc.object()["friendName"].toString();
         QString err;
-        int userId = Database::GetUserIdByUsername(userName, err), friendId = Database::GetUserIdByUsername(friendName, err);
+        int userId = ResolveUserId(userName, err), friendId = ResolveUserId(friendName, err);
 
         QJsonObject resp;
         if (Database::AddFriend(userId, friendId, err))
@@ -296,19 +296,21 @@ int ChatServer::ResolveUserId(const QString &username, QString &err)
     return id;
 }
 
-void ChatServer::ForwardChatMessage(int fromId, const QString &toUsername,
+void ChatServer::ForwardChatMessage(const QString & fromUsername, const QString &toUsername,
                                     const QString &content, QString &err)
 {
     int toId = ResolveUserId(toUsername, err);
     if (toId == -1) return;
 
-    Utils::Logger::GetLogger().Info(QString("ID %1 Send Msg[%2] to %3").arg(fromId).arg(content).arg(toId));
+    Utils::Logger::GetLogger().Info(QString("ID %1 Send Msg[%2] to %3").arg(fromUsername).arg(content).arg(toUsername));
     QString msgId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
 
+    int fromId = ResolveUserId(fromUsername, err);
     QJsonObject msg;
     msg["msgId"] = msgId;
     msg["fromUserId"] = fromId;
+    msg["fromUsername"] = fromUsername;
     msg["content"] = content;
     msg["timestamp"] = timestamp;
     QByteArray body = QJsonDocument(msg).toJson();

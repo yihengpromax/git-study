@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QMessageBox>
 #include <QJsonArray>
+#include <QJsonObject>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(pNetworkMgr, &Network::NetworkManager::FriendListReceived, this, &MainWindow::OnGetFriendList);
     connect(pNetworkMgr, &Network::NetworkManager::AddFriendResult, this, &MainWindow::OnAddFriendResult);
     connect(this, &MainWindow::SendAddFriend, pNetworkMgr, &Network::NetworkManager::AddFriend);
+    connect(pNetworkMgr, &Network::NetworkManager::ChatMessageReceived, this, &MainWindow::OnChatMessageReceived);
+
     connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
         switch (state)
         {
@@ -83,8 +86,9 @@ void MainWindow::OnBtnSendClicked()
     if (!ui->inputEdit->toPlainText().isEmpty())
     {
         emit SendChat(ui->cbFriendList->currentText(), ui->inputEdit->toPlainText());
-        ui->messageDisplay->append(m_sUserName + ":");
-        ui->messageDisplay->append(ui->inputEdit->toPlainText());
+        QString sCurTime = QDateTime::currentDateTime().toString();
+        ui->messageDisplay->append("[" + sCurTime + "]" + m_sUserName + ":");
+        ui->messageDisplay->append("\r" + ui->inputEdit->toPlainText() + "\n");
 
         ui->inputEdit->clear();
     }
@@ -93,9 +97,10 @@ void MainWindow::OnBtnSendClicked()
 void MainWindow::OnGetFriendList(const QJsonArray &friends)
 {
     qDebug() << "//============================= friendlist ==========================";
+    ui->cbFriendList->clear();
     for (const auto &obj : friends)
     {
-        qDebug() << obj;
+        ui->cbFriendList->addItem(obj.toObject()["username"].toString());
     }
 }
 
@@ -117,4 +122,14 @@ void MainWindow::OnBtnAddFriendClicked()
     {
         QMessageBox::information(this, tr("Tips"), tr("Friend Name is Empty!"));
     }
+}
+
+void MainWindow::OnChatMessageReceived(int fromId, const QString &fromUserName, const QString &content, qint64 timestamp)
+{
+    if (-1 == fromId)
+        return;
+
+    QDateTime dt1 = QDateTime::fromMSecsSinceEpoch(timestamp);
+    ui->messageDisplay->append("[" + dt1.toString() + "]" + fromUserName + ":");
+    ui->messageDisplay->append("\r" + content + "\n");
 }

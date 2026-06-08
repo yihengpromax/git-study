@@ -31,6 +31,7 @@ private slots:
     void OnGetFriendList(const QJsonArray &friends);
     void OnAddFriendResult(bool ok, const QString& err);
     void OnBtnAddFriendClicked();
+    void OnChatMessageReceived(int fromId, const QString & fromUserName, const QString &content, qint64 timestamp);
 
 private:
     Ui::MainWindow *ui;

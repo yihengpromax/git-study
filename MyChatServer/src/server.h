@@ -48,7 +48,7 @@ private:
     void SendMessage(QTcpSocket *socket, quint16 type, const QByteArray &body);
     void BroadcastStatus(int userId, bool online);
     void SendFriendList(ClientInfo *info, QString& err);
-    void ForwardChatMessage(int fromId, const QString &toUsername, const QString &content, QString& err);
+    void ForwardChatMessage(const QString & fromUsername, const QString &toUsername, const QString &content, QString& err);
     void SendOfflineMessages(ClientInfo *info, QString& err);
 
     // 工具方法
