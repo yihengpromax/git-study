@@ -16,12 +16,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     Network::NetworkManager *pNetworkMgr = Network::GetInstance();
-    connect(this, &MainWindow::SendChat, pNetworkMgr, &Network::NetworkManager::SendChat);
-    connect(ui->refreshButton, &QPushButton::clicked, pNetworkMgr, &Network::NetworkManager::SendGetFriendList);
+    connect(this, &MainWindow::SendChatReq, pNetworkMgr, &Network::NetworkManager::SendChat);
+    connect(ui->refreshButton, &QPushButton::clicked, this, [&](){
+        emit SendGetFriendListReq();
+    });
+    connect(this, &MainWindow::SendGetFriendListReq, pNetworkMgr, &Network::NetworkManager::SendGetFriendList);
     connect(pNetworkMgr, &Network::NetworkManager::FriendListReceived, this, &MainWindow::OnGetFriendList);
     connect(pNetworkMgr, &Network::NetworkManager::AddFriendResult, this, &MainWindow::OnAddFriendResult);
-    connect(this, &MainWindow::SendAddFriend, pNetworkMgr, &Network::NetworkManager::AddFriend);
+    connect(this, &MainWindow::SendAddFriendReq, pNetworkMgr, &Network::NetworkManager::AddFriend);
     connect(pNetworkMgr, &Network::NetworkManager::ChatMessageReceived, this, &MainWindow::OnChatMessageReceived);
+    connect(this, &MainWindow::SendGetOfflineMsgReq, pNetworkMgr, &Network::NetworkManager::SendGetofflineMsgReq);
 
     connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
         switch (state)
@@ -53,20 +57,8 @@ void MainWindow::InitWindow()
 {
     setWindowTitle(tr("Welcome[%1]").arg(m_sUserName));
     ui->labVersion->setText(QString("%1@yiheng").arg(APP_VERSION));
-    ui->messageDisplay->setStyleSheet(R"(
-    QTextEdit {
-        background-color: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 14px;
-        font-family: "Microsoft YaHei";
-    }
-    QTextEdit:focus {
-        border-color: #07c160;
-    }
-)");
     InitConnect();
+    InitChatInfo();
 }
 
 void MainWindow::InitConnect()
@@ -79,8 +71,8 @@ void MainWindow::InitChatInfo()
 {
     if (!m_sUserName.isEmpty())
     {
-        emit SendGetFriendList();
-        emit SendGetOfflineMsg(m_sUserName);
+        emit SendGetFriendListReq();
+        emit SendGetOfflineMsgReq(m_sUserName);
     }
 }
 
@@ -107,11 +99,11 @@ void MainWindow::OnBtnSendClicked()
 {
     if (!ui->inputEdit->toPlainText().isEmpty())
     {
-        emit SendChat(ui->cbFriendList->currentText(), ui->inputEdit->toPlainText());
+        emit SendChatReq(ui->cbFriendList->currentText(), ui->inputEdit->toPlainText());
         QString sCurTime = QDateTime::currentDateTime().toString();
         ui->messageDisplay->append(" [" + sCurTime + "] " + m_sUserName + ":");
-        appendBubble(ui->inputEdit->toPlainText(), true);
-        // ui->messageDisplay->append("\r" + ui->inputEdit->toPlainText() + "\n");
+        // appendBubble(ui->inputEdit->toPlainText(), true);
+        ui->messageDisplay->append("\r" + ui->inputEdit->toPlainText() + "\n");
 
         ui->inputEdit->clear();
     }
@@ -139,7 +131,7 @@ void MainWindow::OnBtnAddFriendClicked()
 
     if (!ui->usernameInput->text().isEmpty())
     {
-        emit SendAddFriend(m_sUserName, ui->usernameInput->text());
+        emit SendAddFriendReq(m_sUserName, ui->usernameInput->text());
     }
     else
     {
@@ -154,8 +146,8 @@ void MainWindow::OnChatMessageReceived(int fromId, const QString &fromUserName, 
 
     QDateTime dt1 = QDateTime::fromMSecsSinceEpoch(timestamp);
     ui->messageDisplay->append(" [" + dt1.toString() + "] " + fromUserName + ":");
-    appendBubble(content, false);
-    // ui->messageDisplay->append("\r" + content + "\n");
+    // appendBubble(content, false);
+    ui->messageDisplay->append("\r" + content + "\n");
 }
 
 void MainWindow::appendBubble(const QString &text, bool isSelf)
@@ -170,5 +162,5 @@ void MainWindow::appendBubble(const QString &text, bool isSelf)
                        "  </div>"
                        "</div>"
                        ).arg(align, bgColor, text.toHtmlEscaped());
-    ui->messageDisplay->append(html);
+    ui->messageDisplay->insertHtml(html);
 }

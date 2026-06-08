@@ -23,10 +23,10 @@ public:
     static bool ShowMainWindow(QWidget* parent, const QString& sUserName);
 
 signals:
-    void SendChat(const QString &toUsername, const QString &content);
-    void SendGetFriendList();
-    void SendAddFriend(const QString &username, const QString &friendName);
-    void SendGetOfflineMsg(const QString &username);
+    void SendChatReq(const QString &toUsername, const QString &content);
+    void SendGetFriendListReq();
+    void SendAddFriendReq(const QString &username, const QString &friendName);
+    void SendGetOfflineMsgReq(const QString &username);
 
 private slots:
     void OnBtnSendClicked();

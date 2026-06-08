@@ -156,7 +156,7 @@ void NetworkManager::InitNetwork()
     DoWork();
     m_pConnTimer = new QTimer(this);
     connect(m_pConnTimer, &QTimer::timeout, this, &NetworkManager::DoWork);
-    m_pConnTimer->start(3000);
+    m_pConnTimer->start(1000);
 
     // NOTE: Enable Heartbeat Timer
     m_pPingTimer = new QTimer(this);
