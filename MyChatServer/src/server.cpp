@@ -492,13 +492,13 @@ void ChatServer::SendOfflineMessages(ClientInfo *info, QString &err)
     {
         int fromId = msg[0].toInt();
         QString content = msg[1];
-        QString timestamp = msg.size() > 2 ? msg[2] : "0";  // 带上时间戳
+        QString datetime = msg.size() > 2 ? msg[2] : "0";  // 带上时间戳
 
         QJsonObject obj;
         obj["msgId"] = QUuid::createUuid().toString(QUuid::WithoutBraces);
         obj["fromUserId"] = fromId;
         obj["content"] = content;
-        obj["timestamp"] = timestamp.toLongLong();
+        obj["datetime"] = datetime;
         obj["fromUsername"] = ResolveUsername(fromId, err);
         SendMessage(info->socket, Msg_Chat, QJsonDocument(obj).toJson());
     }

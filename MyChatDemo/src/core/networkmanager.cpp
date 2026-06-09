@@ -51,7 +51,6 @@ NetworkManager::~NetworkManager()
 
 void NetworkManager::ConnectToServer(const QString &host, quint16 port, std::function<void (bool)> callback)
 {
-    qDebug () << "ConnectToServer"<< QThread::currentThreadId();
     m_funcConnCallback = callback;
     emit UpdateConnState(QTcpSocket::ConnectingState);
     connectToHost(host, port);
@@ -191,8 +190,8 @@ void NetworkManager::OnReadyRead()
             int fromId = doc.object()["fromUserId"].toInt();
             QString fromUserName = doc.object()["fromUsername"].toString();
             QString content = doc.object()["content"].toString();
-            qint64 ts = doc.object()["timestamp"].toVariant().toLongLong();
-            emit ChatMessageReceived(fromId, fromUserName, content, ts);
+            QString datetime = doc.object()["datetime"].toVariant().toString();
+            emit ChatMessageReceived(fromId, fromUserName, content, datetime);
             break;
         }
         case Msg_ChatAck: {

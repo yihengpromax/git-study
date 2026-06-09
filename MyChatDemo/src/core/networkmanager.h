@@ -33,7 +33,7 @@ signals:
     void UpdateConnState(QTcpSocket::SocketState state);
     void LoginResult(bool ok, int userId, const QString &err);
     void FriendListReceived(const QJsonArray &friends);
-    void ChatMessageReceived(int fromId, const QString & fromUserName, const QString &content, qint64 timestamp);
+    void ChatMessageReceived(int fromId, const QString & fromUserName, const QString &content, const QString &date);
     void ChatMsgResult(const QString& msgId, const QString& msg);
     void StatusUpdateReceived(int userId, bool online);
     void ErrorOccurred(const QString &err);
