@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QKeyEvent>
 
 namespace Ui {
 class MainWindow;
@@ -21,6 +22,9 @@ public:
 
 public:
     static bool ShowMainWindow(QWidget* parent, const QString& sUserName);
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event);
 
 signals:
     void SendChatReq(const QString &toUsername, const QString &content);

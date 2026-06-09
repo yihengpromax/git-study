@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    ui->inputEdit->removeEventFilter(this);
     delete ui;
 }
 
@@ -57,6 +58,7 @@ void MainWindow::InitWindow()
 {
     setWindowTitle(tr("Welcome[%1]").arg(m_sUserName));
     ui->labVersion->setText(QString("%1@yiheng").arg(APP_VERSION));
+    ui->inputEdit->installEventFilter(this);
     InitConnect();
     InitChatInfo();
 }
@@ -95,11 +97,36 @@ bool MainWindow::ShowMainWindow(QWidget *parent, const QString& sUserName)
     return true;
 }
 
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if ((watched == ui->inputEdit) && (event->type() == QEvent::KeyPress))
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        int key = keyEvent->key();
+
+        if (key == Qt::Key_Return || key == Qt::Key_Enter)
+        {
+            if (keyEvent->modifiers() & Qt::ShiftModifier)
+            {
+                // Shift + Enter：正常插入换行符，不发送
+                return false;
+            }
+            else
+            {
+                OnBtnSendClicked();
+                return true;
+            }
+        }
+    }
+
+    return QMainWindow::eventFilter(watched, event);
+}
+
 void MainWindow::OnBtnSendClicked()
 {
     if (!ui->inputEdit->toPlainText().isEmpty())
     {
-        emit SendChatReq(ui->cbFriendList->currentText(), ui->inputEdit->toPlainText());
+        emit SendChatReq(ui->cbFriendList->currentText(), ui->inputEdit->toPlainText().trimmed());
         QString sCurTime = QDateTime::currentDateTime().toString();
         ui->messageDisplay->append(" [" + sCurTime + "] " + m_sUserName + ":");
         // appendBubble(ui->inputEdit->toPlainText(), true);
