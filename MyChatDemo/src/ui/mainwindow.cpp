@@ -166,12 +166,13 @@ void MainWindow::OnBtnAddFriendClicked()
     }
 }
 
-void MainWindow::OnChatMessageReceived(int fromId, const QString &fromUserName, const QString &content, const QString &datetime)
+void MainWindow::OnChatMessageReceived(int fromId, const QString &fromUserName, const QString &content, qint64 ts)
 {
     if (-1 == fromId)
         return;
 
-    ui->messageDisplay->append(" [" + datetime + "] " + fromUserName + ":");
+    QString dt = QDateTime::fromMSecsSinceEpoch(ts).toString();
+    ui->messageDisplay->append(" [" + dt + "] " + fromUserName + ":");
     // appendBubble(content, false);
     ui->messageDisplay->append("\r" + content + "\n");
 }

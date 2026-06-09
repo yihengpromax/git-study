@@ -37,7 +37,7 @@ private slots:
     void OnGetFriendList(const QJsonArray &friends);
     void OnAddFriendResult(bool ok, const QString& err);
     void OnBtnAddFriendClicked();
-    void OnChatMessageReceived(int fromId, const QString &fromUserName, const QString &content, const QString &datetime);
+    void OnChatMessageReceived(int fromId, const QString &fromUserName, const QString &content, qint64 ts);
 
 private:
     void appendBubble(const QString &text, bool isSelf);

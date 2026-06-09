@@ -381,7 +381,7 @@ void ChatServer::ForwardChatMessage(const QString & fromUsername, const QString 
         NotifySender(fromId, msgId, "stored_offline");
     }
 
-    Database::StoreLatestMsg(fromId, toId, content, err);
+    Database::StoreLatestMsg(fromId, toId, content, timestamp, err);
 }
 
 void ChatServer::NotifySender(int fromId, const QString &msgId, const QString &status)
@@ -440,7 +440,7 @@ void ChatServer::OnAckTimeout()
     {
         PendingMsg pm = m_pendingMsgs.take(id);
         QString err;
-        Database::StoreOfflineMsg(pm.fromId, pm.toId, pm.content, err);
+        Database::StoreOfflineMsg(pm.fromId, pm.toId, pm.content, now, err);
         NotifySender(pm.fromId, pm.msgId, "stored_offline");
         Utils::Logger::GetLogger().Info(QString("Msg: %1 ACK timeout, stored offline").arg(pm.msgId));
     }
@@ -492,13 +492,13 @@ void ChatServer::SendOfflineMessages(ClientInfo *info, QString &err)
     {
         int fromId = msg[0].toInt();
         QString content = msg[1];
-        QString datetime = msg.size() > 2 ? msg[2] : "0";  // 带上时间戳
+        QString timestamp = msg.size() > 2 ? msg[2] : "0";  // 带上时间戳
 
         QJsonObject obj;
         obj["msgId"] = QUuid::createUuid().toString(QUuid::WithoutBraces);
         obj["fromUserId"] = fromId;
         obj["content"] = content;
-        obj["datetime"] = datetime;
+        obj["timestamp"] = timestamp.toLongLong();
         obj["fromUsername"] = ResolveUsername(fromId, err);
         SendMessage(info->socket, Msg_Chat, QJsonDocument(obj).toJson());
     }
@@ -515,7 +515,7 @@ void ChatServer::OnDisconnected()
 
     ClientInfo *info = m_clients.take(socket);
     Utils::Logger::GetLogger().Info(QString("Disconnected: %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()));
-
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
     if (info->userId != -1)
     {
         // 将该用户所有未确认消息转存为离线消息
@@ -526,7 +526,7 @@ void ChatServer::OnDisconnected()
             {
                 QString err;
                 Database::StoreOfflineMsg(it.value().fromId, it.value().toId,
-                                          it.value().content, err);
+                                          it.value().content, now, err);
                 NotifySender(it.value().fromId, it.value().msgId, "stored_offline");
                 toRemove.append(it.key());
             }

@@ -190,8 +190,8 @@ void NetworkManager::OnReadyRead()
             int fromId = doc.object()["fromUserId"].toInt();
             QString fromUserName = doc.object()["fromUsername"].toString();
             QString content = doc.object()["content"].toString();
-            QString datetime = doc.object()["datetime"].toVariant().toString();
-            emit ChatMessageReceived(fromId, fromUserName, content, datetime);
+            qint64 ts = doc.object()["timestamp"].toInteger();
+            emit ChatMessageReceived(fromId, fromUserName, content, ts);
             break;
         }
         case Msg_ChatAck: {

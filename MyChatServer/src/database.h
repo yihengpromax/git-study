@@ -24,10 +24,10 @@ public:
                              int sex, const QString &birth, const QString &signature, QString& err);
     static QList<UserInfo> GetFriendList(int userId, QString& err);
     static bool AddFriend(int userId, int friendId, QString& err);
-    static bool StoreOfflineMsg(int fromId, int toId, const QString &content, QString& err);
+    static bool StoreOfflineMsg(int fromId, int toId, const QString &content, qint64 ts, QString& err);
     static QList<QStringList> GetOfflineMsgs(int userId, QString& err);
     static bool ClearOfflineMsgs(int userId, QString& err);
-    static bool StoreLatestMsg(int fromId, int toId, const QString &content, QString& err);
+    static bool StoreLatestMsg(int fromId, int toId, const QString &content, qint64 ts, QString& err);
     static QList<QStringList> GetLatestMsgs(int userId, QString& err);
     static bool ClearExceededtMsgs(int userId, QString& err);
     static void UpdateUserOnline(int userId, bool online, QString& err);
