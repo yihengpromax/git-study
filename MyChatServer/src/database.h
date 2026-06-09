@@ -27,7 +27,7 @@ public:
     static bool StoreOfflineMsg(int fromId, int toId, const QString &content, QString& err);
     static QList<QStringList> GetOfflineMsgs(int userId, QString& err);
     static bool ClearOfflineMsgs(int userId, QString& err);
-    static bool StoreLatestMsg(int fromId, int toId, const QString &content, qint64 timestamp, QString& err);
+    static bool StoreLatestMsg(int fromId, int toId, const QString &content, QString& err);
     static QList<QStringList> GetLatestMsgs(int userId, QString& err);
     static bool ClearExceededtMsgs(int userId, QString& err);
     static void UpdateUserOnline(int userId, bool online, QString& err);
