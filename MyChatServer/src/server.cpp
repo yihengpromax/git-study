@@ -381,7 +381,7 @@ void ChatServer::ForwardChatMessage(const QString & fromUsername, const QString 
         NotifySender(fromId, msgId, "stored_offline");
     }
 
-    Database::StoreLatestMsg(fromId, toId, content, err);
+    Database::StoreLatestMsg(fromId, toId, content, timestamp, err);
 }
 
 void ChatServer::NotifySender(int fromId, const QString &msgId, const QString &status)

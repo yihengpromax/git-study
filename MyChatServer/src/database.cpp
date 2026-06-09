@@ -203,14 +203,15 @@ bool Database::ClearOfflineMsgs(int userId, QString& err)
     return bRst;
 }
 
-bool Database::StoreLatestMsg(int fromId, int toId, const QString &content, QString &err)
+bool Database::StoreLatestMsg(int fromId, int toId, const QString &content, qint64 timestamp, QString &err)
 {
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("INSERT INTO latest_messages (from_id, to_id, content, timestamp) "
-              "VALUES (:f, :t, :c, NOW())");
+              "VALUES (:f, :t, :c, :time)");
     q.bindValue(":f", fromId);
     q.bindValue(":t", toId);
     q.bindValue(":c", content);
+    q.bindValue(":time", timestamp);
 
     bool bRst = q.exec();
     err = q.lastError().text();
