@@ -28,8 +28,9 @@ NetworkManager::NetworkManager(QTcpSocket *parent)
     , m_funcConnCallback(nullptr)
     , m_pConnTimer(nullptr)
     , m_pPingTimer(nullptr)
+    , m_iWaitCnt(0)
 {
-    qDebug () << "NetworkManager"<< QThread::currentThreadId();
+    // qDebug () << "NetworkManager"<< QThread::currentThreadId();
 }
 
 NetworkManager::~NetworkManager()
@@ -131,10 +132,20 @@ void NetworkManager::onStopConnTimer()
 
 void NetworkManager::DoWork()
 {
-    emit UpdateConnState(state());
+    if (m_iWaitCnt > 15)
+    {
+        emit UpdateConnState(404);
+        m_iWaitCnt = 0;
+    }
+    else
+    {
+        emit UpdateConnState(state());
+    }
+
     if (state() == QTcpSocket::SocketState::UnconnectedState)
     {
         ConnectToServer(SERVER_IP, LINSTEN_PORT);
+        ++m_iWaitCnt;
     }
 }
 
@@ -155,7 +166,7 @@ void NetworkManager::InitNetwork()
     DoWork();
     m_pConnTimer = new QTimer(this);
     connect(m_pConnTimer, &QTimer::timeout, this, &NetworkManager::DoWork);
-    m_pConnTimer->start(1000);
+    m_pConnTimer->start(3000);
 
     // NOTE: Enable Heartbeat Timer
     m_pPingTimer = new QTimer(this);
@@ -233,6 +244,7 @@ void NetworkManager::OnReadyRead()
 
 void NetworkManager::OnSocketConnected()
 {
+    m_iWaitCnt = 0;
     if (m_funcConnCallback)
     {
         m_funcConnCallback(true);
@@ -242,11 +254,12 @@ void NetworkManager::OnSocketConnected()
 
 void NetworkManager::OnSocketDisconnected()
 {
-
+    m_iWaitCnt = 0;
 }
 
 void NetworkManager::OnErrorOccurred(QAbstractSocket::SocketError error)
 {
+    m_iWaitCnt = 0;
     emit ErrorOccurred(errorString());
     if (m_funcConnCallback)
     {

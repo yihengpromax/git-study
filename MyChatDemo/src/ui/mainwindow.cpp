@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(pNetworkMgr, &Network::NetworkManager::ChatMessageReceived, this, &MainWindow::OnChatMessageReceived);
     connect(this, &MainWindow::SendGetOfflineMsgReq, pNetworkMgr, &Network::NetworkManager::SendGetofflineMsgReq);
 
-    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
+    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](int state){
         switch (state)
         {
         case QTcpSocket::SocketState::ConnectedState:
@@ -59,6 +59,9 @@ void MainWindow::InitWindow()
     setWindowTitle(tr("Welcome[%1]").arg(m_sUserName));
     ui->labVersion->setText(QString("%1@yiheng").arg(APP_VERSION));
     ui->inputEdit->installEventFilter(this);
+    QPalette ple = ui->messageDisplay->palette();
+    ple.setColor(QPalette::Base, QColor(qRgb(199, 237, 204)));
+    ui->messageDisplay->setPalette(ple);
     InitConnect();
     InitChatInfo();
 }
@@ -128,10 +131,11 @@ void MainWindow::OnBtnSendClicked()
     {
         emit SendChatReq(ui->cbFriendList->currentText(), ui->inputEdit->toPlainText().trimmed());
         QString sCurTime = QDateTime::currentDateTime().toString();
-        ui->messageDisplay->append(" [" + sCurTime + "] " + m_sUserName + ":");
-        // appendBubble(ui->inputEdit->toPlainText(), true);
-        ui->messageDisplay->append("\r" + ui->inputEdit->toPlainText() + "\n");
-
+        QColor saveOldColor = ui->messageDisplay->textBackgroundColor();
+        ui->messageDisplay->setTextBackgroundColor(QColor(204, 232, 207)); // #07C160
+        ui->messageDisplay->append(" [" + sCurTime + "] " + "我: ");
+        ui->messageDisplay->append("\r" + ui->inputEdit->toPlainText().toHtmlEscaped() + "\n");
+        ui->messageDisplay->setTextBackgroundColor(saveOldColor);
         ui->inputEdit->clear();
     }
 }

@@ -21,8 +21,8 @@ ChatServer::ChatServer(QObject *parent) : QTcpServer(parent)
     m_heartbeatTimer->start(30000);
 
     // ACK 超时检测定时器
-    // m_ackTimer = new QTimer(this);
-    // connect(m_ackTimer, &QTimer::timeout, this, &ChatServer::OnAckTimeout);
+    m_ackTimer = new QTimer(this);
+    connect(m_ackTimer, &QTimer::timeout, this, &ChatServer::OnAckTimeout);
     // m_ackTimer->start(5000);
 }
 
@@ -191,8 +191,6 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
             resp["result"] = "fail";
             resp["error"] = err;
             SendMessage(info->socket, Msg_LoginResult, QJsonDocument(resp).toJson());
-            info->socket->flush();
-            info->socket->disconnectFromHost();
         }
     }
     else if (type == Msg_Logout)
@@ -206,7 +204,6 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
             m_usernameToId.remove(info->username);
             info->userId = -1;
         }
-        info->socket->disconnectFromHost();
     }
     else if (type == Msg_Ping)
     {
@@ -278,8 +275,6 @@ void ChatServer::ProcessPacket(ClientInfo *info, quint16 type, const QByteArray 
             resp["error"] = err;
         }
         SendMessage(info->socket, Msg_RegisterResult, QJsonDocument(resp).toJson());
-        info->socket->flush();
-        info->socket->disconnectFromHost();
     }
     else if (type == Msg_OfflineMsg)
     {

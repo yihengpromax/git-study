@@ -27,8 +27,25 @@ LoginFrame::LoginFrame(QWidget *parent)
     Network::NetworkManager *pNetworkMgr = Network::GetInstance();
     connect(this, &LoginFrame::Logged, pNetworkMgr, &Network::NetworkManager::SendLogin);
     connect(pNetworkMgr, &Network::NetworkManager::LoginResult, this, &LoginFrame::OnLoginResult);
-    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
+    connect(pNetworkMgr, &Network::NetworkManager::ErrorOccurred, this, [&](const QString& error){
+        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
+        if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+        QMessageBox::critical(this, tr("Error"), tr("Encountered an error: %1, Please Retry").arg(error));
+    });
+    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](int state){
         m_bOnline = (state == QTcpSocket::ConnectedState);
+        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
+        if (m_bOnline)
+        {
+            if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+        }
+
+        if (404 == state)
+        {
+
+            if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+            QMessageBox::critical(this, tr("Error"), tr("Connect Server Request Timeout, Please Retry"));
+        }
     });
 }
 
@@ -63,7 +80,7 @@ void LoginFrame::InitWindow()
     // 处理自动登录事件
     if (m_bRememberPassword && m_bAutoLogin)
     {
-
+        // OnBtnLoginClicked();
     }
 }
 
@@ -174,15 +191,17 @@ void LoginFrame::OnBtnLoginClicked()
         m_bRememberPassword = ui->cb_remember_password->isChecked();
         m_bAutoLogin = ui->cb_auto_login->isChecked();
 
+        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
         if (IsOnline())
         {
-            LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Logging in..."), nullptr);
+            instanceDlg->setText(tr("Logging..."));
             if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
             emit Logged(m_sCurUserID, m_sCurPassword);
         }
         else
         {
-            QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
+            instanceDlg->setText(tr("Please Wait Connected..."));
+            if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
         }
     }
     else

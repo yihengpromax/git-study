@@ -20,8 +20,25 @@ UserRegisterDlg::UserRegisterDlg(QWidget *parent)
     Network::NetworkManager* pNetworkMgr = Network::GetInstance();
     connect(this, &UserRegisterDlg::Registered, pNetworkMgr, &Network::NetworkManager::SendRegisterUser);
     connect(pNetworkMgr, &Network::NetworkManager::RegisterResult, this, &UserRegisterDlg::OnRegisterResult);
-    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](QTcpSocket::SocketState state){
+    connect(pNetworkMgr, &Network::NetworkManager::ErrorOccurred, this, [&](const QString& error){
+        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
+        if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+        QMessageBox::critical(this, tr("Error"), tr("Encountered an error: %1, Please Retry").arg(error));
+    });
+    connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](int state){
         m_bOnline = (state == QTcpSocket::ConnectedState);
+        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
+        if (m_bOnline)
+        {
+            if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+        }
+
+        if (404 == state)
+        {
+
+            if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+            QMessageBox::critical(this, tr("Error"), tr("Connect Server Request Timeout, Please Retry"));
+        }
     });
 }
 
@@ -173,18 +190,20 @@ void UserRegisterDlg::OnBtnAcceptClicked()
         return;
     }
 
-    // NOTE: 发送注册指令并等待结果
+    LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
     if (IsOnline())
     {
-        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance(tr("Please wait..."), nullptr);
+        // NOTE: 发送注册指令并等待结果
+        instanceDlg->setText(tr("Please wait..."));
         if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
         emit Registered(ui->lineedit_username->text(), ui->lineedit_enpassword->text(),
-                                        ui->lineedit_nickname->text(), ui->cb_sex->currentIndex(),
-                                        ui->dateedit_birth->date().toString(), ui->textedit_signatrue->toPlainText());
+                        ui->lineedit_nickname->text(), ui->cb_sex->currentIndex(),
+                        ui->dateedit_birth->date().toString(), ui->textedit_signatrue->toPlainText());
     }
     else
     {
-        QMessageBox::critical(this, tr("Error"), tr("Can't Connect to Server."));
+        instanceDlg->setText(tr("Please Wait Connected..."));
+        if (!instanceDlg->IsStarted()) instanceDlg->startLoading();
     }
 }
 

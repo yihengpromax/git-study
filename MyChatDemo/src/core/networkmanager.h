@@ -30,7 +30,7 @@ public slots:
     void onStopConnTimer();
 
 signals:
-    void UpdateConnState(QTcpSocket::SocketState state);
+    void UpdateConnState(int state);
     void LoginResult(bool ok, int userId, const QString &err);
     void FriendListReceived(const QJsonArray &friends);
     void ChatMessageReceived(int fromId, const QString & fromUserName, const QString &content, qint64 ts);
@@ -50,6 +50,7 @@ private:
     QByteArray m_recvBuffer;
     std::function<void (bool)> m_funcConnCallback;
     QTimer *m_pConnTimer, *m_pPingTimer;
+    int m_iWaitCnt;
 };
 
 NetworkManager* GetInstance(QTcpSocket *parent = nullptr);
