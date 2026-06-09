@@ -111,7 +111,6 @@ void MainWindow::OnBtnSendClicked()
 
 void MainWindow::OnGetFriendList(const QJsonArray &friends)
 {
-    qDebug() << "//============================= friendlist ==========================";
     ui->cbFriendList->clear();
     for (const auto &obj : friends)
     {

@@ -51,6 +51,11 @@ bool Database::Init(const QString &host, const QString &dbname,
                "id INT AUTO_INCREMENT PRIMARY KEY,"
                "from_id INT, to_id INT, content TEXT, timestamp DATETIME)");
 
+    // latest_messages
+    query.exec("CREATE TABLE IF NOT EXISTS latest_messages ("
+               "id INT AUTO_INCREMENT PRIMARY KEY,"
+               "from_id INT, to_id INT, content TEXT, timestamp DATETIME)");
+
     return true;
 }
 
@@ -169,7 +174,7 @@ QList<QStringList> Database::GetOfflineMsgs(int userId, QString& err)
 {
     QList<QStringList> msgs;
     QSqlQuery q(QSqlDatabase::database("conn1"));
-    q.prepare("SELECT from_id, content, timestamp FROM offline_messages WHERE to_id = :uid");
+    q.prepare("SELECT from_id, content, timestamp FROM offline_messages WHERE to_id = :uid ORDER BY timestamp LIMIT 30");
     q.bindValue(":uid", userId);
     if (!q.exec())
     {
@@ -191,6 +196,56 @@ bool Database::ClearOfflineMsgs(int userId, QString& err)
 {
     QSqlQuery q(QSqlDatabase::database("conn1"));
     q.prepare("DELETE FROM offline_messages WHERE to_id = :uid");
+    q.bindValue(":uid", userId);
+    bool bRst = q.exec();
+    err = q.lastError().text();
+
+    return bRst;
+}
+
+bool Database::StoreLatestMsg(int fromId, int toId, const QString &content, QString &err)
+{
+    QSqlQuery q(QSqlDatabase::database("conn1"));
+    q.prepare("INSERT INTO latest_messages (from_id, to_id, content, timestamp) "
+              "VALUES (:f, :t, :c, NOW())");
+    q.bindValue(":f", fromId);
+    q.bindValue(":t", toId);
+    q.bindValue(":c", content);
+
+    bool bRst = q.exec();
+    err = q.lastError().text();
+
+    return bRst;
+}
+
+QList<QStringList> Database::GetLatestMsgs(int userId, QString &err)
+{
+    QList<QStringList> msgs;
+    QSqlQuery q(QSqlDatabase::database("conn1"));
+    q.prepare("SELECT from_id, content, timestamp FROM latest_messages WHERE to_id = :uid");
+    q.bindValue(":uid", userId);
+    if (!q.exec())
+    {
+        err = q.lastError().text();
+        return msgs;
+    }
+
+    while (q.next())
+    {
+        QStringList msg;
+        msg << QString::number(q.value(0).toInt()) << q.value(1).toString() << q.value(2).toString();
+        msgs.append(msg);
+    }
+
+    return msgs;
+}
+
+bool Database::ClearExceededtMsgs(int userId, QString &err)
+{
+    QSqlQuery q(QSqlDatabase::database("conn1"));
+
+    // 清除掉三天之前的消息
+    q.prepare("DELETE FROM latest_messages WHERE to_id = :uid AND timestamp < DATE_SUB(NOW(), INTERVAL 3 DAY)");
     q.bindValue(":uid", userId);
     bool bRst = q.exec();
     err = q.lastError().text();

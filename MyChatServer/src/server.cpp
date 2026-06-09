@@ -364,21 +364,24 @@ void ChatServer::ForwardChatMessage(const QString & fromUsername, const QString 
             m_pendingMsgs[msgId] = pm;
 
             // 通知发送方：已发送
+            //Database::StoreOfflineMsg(fromId, toId, content, err);
             NotifySender(fromId, msgId, "sent");
         }
         else
         {
             // socket 失效，清理并存离线
             m_userSocket.remove(toId);
-            Database::StoreOfflineMsg(fromId, toId, content, err);
+            //Database::StoreOfflineMsg(fromId, toId, content, err);
             NotifySender(fromId, msgId, "stored_offline");
         }
     }
     else
     {
-        Database::StoreOfflineMsg(fromId, toId, content, err);
+        //Database::StoreOfflineMsg(fromId, toId, content, err);
         NotifySender(fromId, msgId, "stored_offline");
     }
+
+    Database::StoreLatestMsg(fromId, toId, content, err);
 }
 
 void ChatServer::NotifySender(int fromId, const QString &msgId, const QString &status)
@@ -484,7 +487,7 @@ void ChatServer::SendFriendList(ClientInfo *info, QString &err)
 void ChatServer::SendOfflineMessages(ClientInfo *info, QString &err)
 {
     int userId = ResolveUserId(info->username, err);
-    auto msgs = Database::GetOfflineMsgs(userId, err);
+    auto msgs = Database::GetLatestMsgs(userId, err);
     for (const auto &msg : msgs)
     {
         int fromId = msg[0].toInt();
@@ -499,7 +502,8 @@ void ChatServer::SendOfflineMessages(ClientInfo *info, QString &err)
         obj["fromUsername"] = ResolveUsername(fromId, err);
         SendMessage(info->socket, Msg_Chat, QJsonDocument(obj).toJson());
     }
-    Database::ClearOfflineMsgs(userId, err);
+    // Database::ClearOfflineMsgs(userId, err);
+    Database::ClearExceededtMsgs(userId, err);
 }
 
 // ======================== 断线与心跳 ========================
