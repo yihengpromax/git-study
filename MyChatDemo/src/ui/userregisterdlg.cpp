@@ -20,11 +20,11 @@ UserRegisterDlg::UserRegisterDlg(QWidget *parent)
     Network::NetworkManager* pNetworkMgr = Network::GetInstance();
     connect(this, &UserRegisterDlg::Registered, pNetworkMgr, &Network::NetworkManager::SendRegisterUser);
     connect(pNetworkMgr, &Network::NetworkManager::RegisterResult, this, &UserRegisterDlg::OnRegisterResult);
-    connect(pNetworkMgr, &Network::NetworkManager::ErrorOccurred, this, [&](const QString& error){
-        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
-        if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
-        QMessageBox::critical(this, tr("Error"), tr("Encountered an error: %1, Please Retry").arg(error));
-    });
+    // connect(pNetworkMgr, &Network::NetworkManager::ErrorOccurred, this, [&](const QString& error){
+    //     LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
+    //     if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+    //     QMessageBox::critical(this, tr("Error"), tr("Encountered an error: %1, Please Retry").arg(error));
+    // });
     connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](int state){
         m_bOnline = (state == QTcpSocket::ConnectedState);
         LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
@@ -35,7 +35,6 @@ UserRegisterDlg::UserRegisterDlg(QWidget *parent)
 
         if (404 == state)
         {
-
             if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
             QMessageBox::critical(this, tr("Error"), tr("Connect Server Request Timeout, Please Retry"));
         }

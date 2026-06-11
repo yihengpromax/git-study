@@ -152,6 +152,10 @@ void MainWindow::OnGetFriendList(const QJsonArray &friends)
 void MainWindow::OnAddFriendResult(bool ok, const QString& err)
 {
     ok ? QMessageBox::information(this, tr("Tips"), tr("Add Success！")) : QMessageBox::information(this, tr("Tips"), tr("Add Faild"));
+    if (ok)
+    {
+        emit SendGetFriendListReq();
+    }
 }
 
 void MainWindow::OnBtnAddFriendClicked()

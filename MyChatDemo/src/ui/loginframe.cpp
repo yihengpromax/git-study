@@ -27,11 +27,11 @@ LoginFrame::LoginFrame(QWidget *parent)
     Network::NetworkManager *pNetworkMgr = Network::GetInstance();
     connect(this, &LoginFrame::Logged, pNetworkMgr, &Network::NetworkManager::SendLogin);
     connect(pNetworkMgr, &Network::NetworkManager::LoginResult, this, &LoginFrame::OnLoginResult);
-    connect(pNetworkMgr, &Network::NetworkManager::ErrorOccurred, this, [&](const QString& error){
-        LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
-        if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
-        QMessageBox::critical(this, tr("Error"), tr("Encountered an error: %1, Please Retry").arg(error));
-    });
+    // connect(pNetworkMgr, &Network::NetworkManager::ErrorOccurred, this, [&](const QString& error){
+    //     LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
+    //     if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
+    //     QMessageBox::critical(this, tr("Error"), tr("Encountered an error: %1, Please Retry").arg(error));
+    // });
     connect(pNetworkMgr, &Network::NetworkManager::UpdateConnState, this, [&](int state){
         m_bOnline = (state == QTcpSocket::ConnectedState);
         LoadingBubbleDialog* instanceDlg = LoadingBubbleDialog::GetInstance();
@@ -42,7 +42,6 @@ LoginFrame::LoginFrame(QWidget *parent)
 
         if (404 == state)
         {
-
             if (instanceDlg->IsStarted()) instanceDlg->stopLoading();
             QMessageBox::critical(this, tr("Error"), tr("Connect Server Request Timeout, Please Retry"));
         }

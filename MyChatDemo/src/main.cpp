@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         Network::NetworkManager* pNetworkMgr = Network::GetInstance();
         QThread thNetwork;
         QObject::connect(&thNetwork, &QThread::started, pNetworkMgr, &Network::NetworkManager::InitNetwork);
-        pNetworkMgr->moveToThread(&thNetwork);
+        pNetworkMgr->moveToThread(&thNetwork); // 先移动到子线程，那么之后创建的对象都隶属于子线程，亲和性
         thNetwork.start();
 
         // 进入Qt事件循环
